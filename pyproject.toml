@@ -1,0 +1,30 @@
+[project]
+name = "ticketing-system"
+version = "0.1.0"
+description = "AI powered IT Ticket Triage System"
+authors = [
+    { name = "Nathan Anderson", email = "n0a64415@marymount.edu" },
+    { name = "Adhwa Altheyab", email = "a0a97644@marymount.edu" },
+]
+license = "MIT"
+license-files = ["LICENSE.md"]
+keywords = ["web", "ai", "help desk", "IT", "ticketing"]
+readme = "README.md"
+requires-python = ">=3.13, <3.14"
+dependencies = [
+    "loguru>=0.7.3",
+    "nicegui>=3.8.0",
+    "pydantic>=2.12.5",
+    "pydantic-settings>=2.13.1",
+    "pywebview>=6.1",
+]
+
+
+[project.urls]
+Homepage = "https://github.com/violit-dev/violit"
+Documentation = "https://github.com/violit-dev/violit"
+Repository = "https://github.com/violit-dev/violit"
+Issues = "https://github.com/violit-dev/violit/issues"
+
+[dependency-groups]
+dev = ["pytest>=9.0.2", "ruff>=0.15.5"]
