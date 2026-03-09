@@ -36,4 +36,4 @@ def _status():
     return "Ok"
 
 
-ui.run(title=settings.app_name, reload=settings.app_env == "develop")
+ui.run(title=settings.app_name, favicon="🤖", reload=settings.app_env == "develop")

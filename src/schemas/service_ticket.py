@@ -41,9 +41,7 @@ class ServiceTicketCreate(BaseSchema):
     error_message_details: str | None = Field(
         default=None, description="Details from the error message if received"
     )
-    attachments: list[str] = Field(
-        default_factory=list, description="Attachments uploaded with the ticket"
-    )
+    assignee: str = Field(..., description="Who is the ticket assigned too")
 
 
 class ServiceTicketUpdate(ServiceTicketCreate, AuditMixin):
