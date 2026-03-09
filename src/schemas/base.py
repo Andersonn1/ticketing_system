@@ -17,14 +17,11 @@ class BaseSchema(BaseModel):
 class AuditMixin:
     """Audit Mixin"""
 
-    created_at: datetime = Field(
+    created_at: datetime | None = Field(
         default_factory=lambda: datetime.now(timezone.utc),
         description="When was the entity created",
     )
-    updated_at: datetime = Field(
+    updated_at: datetime | None = Field(
         default_factory=lambda: datetime.now(timezone.utc),
         description="When was the entity last updated",
-    )
-    updated_by: str | None = Field(
-        default=None, description="Who last updated the entity"
     )

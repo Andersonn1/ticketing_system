@@ -10,5 +10,5 @@ from src.core.theme import frame
 def register() -> None:
     @ui.page("/")
     def home_page():
-        with frame("- Page B -"):
+        with frame("Welcome to IT Support System"):
             ui.label("This is the home page.")
