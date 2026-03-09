@@ -1,0 +1,56 @@
+# Version control and editor artifacts
+.git
+.gitignore
+.gitattributes
+**/.git
+**/.DS_Store
+.idea
+.vscode
+
+# Local env and credentials (kept for local/docker compose env_file usage)
+.env
+.env.*
+
+# Python build/runtime artifacts
+**/__pycache__
+**/*.py[cod]
+**/*.pyo
+**/*.pyd
+**/.pytest_cache
+**/.ruff_cache
+
+# Dependency/venv caches
+.venv
+**/.venv
+**/.tox
+**/.mypy_cache
+
+# Test and coverage output
+**/.coverage
+**/htmlcov
+**/.pytest_cache
+**/tests
+**/test_*
+
+# OS/editor/temp files
+**/*.swp
+**/*.swo
+**/.DS_Store
+
+# Docker related files not needed in build context
+docker-compose.yml
+compose.yml
+Dockerfile
+dockerfiles/
+pgadmin/
+postgres.env
+pgadmin.env
+postgres/
+*.md
+LICENSE
+# Logs and local state
+logs
+tmp
+**/tmp
+**/dist
+**/build
