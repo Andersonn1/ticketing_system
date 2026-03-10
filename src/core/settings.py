@@ -5,7 +5,7 @@ from __future__ import annotations
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import Field, SecretStr
+from pydantic import Field, PostgresDsn, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 VALID_LOG_LEVEL_NAMES = Literal[
@@ -53,6 +53,22 @@ class Settings(BaseSettings):
         default=SecretStr("Please provide a valid API key"),
         description="The API key to use to auth with the AI provider",
     )
+    db_name: str = Field(..., description="The postgres database name")
+    db_user: str = Field(..., description="The postgres database user")
+    db_host: str = Field(default="localhost", description="The postgres host")
+    db_password: SecretStr = Field(..., description="The postgres database password")
+    db_port: int = Field(..., description="The postgres database port")
+
+    def database_url(self) -> str:
+        """Build the async SQLAlchemy connection URL for PostgreSQL."""
+        return PostgresDsn.build(
+            scheme="postgresql+asyncpg",
+            username=self.db_user,
+            password=self.db_password.get_secret_value(),
+            host=self.db_host,
+            port=self.db_port,
+            path=self.db_name,
+        ).unicode_string()
 
 
 @lru_cache(maxsize=1)

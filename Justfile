@@ -34,6 +34,24 @@ up:
 start: source_venv
     uv run python -m src.main
 
+[group("Project Setup")]
+[doc("Bootstrap local dev environment (env files, venv, deps, logs dir)")]
+setup:
+    ./scripts/setup-env-files.sh
+    uv venv
+    uv sync
+    mkdir -p logs
+
+[group("Project Setup")]
+[doc("Install optional development dependency group")]
+setup-dev:
+    uv sync --group dev
+
+[group("Application Migrations")]
+[doc("Create a new database migration")]
+migration-new message="auto migration":
+    docker exec -it ticketing-system-app uv run alembic revision --autogenerate -m "{{message}}"
+
 [group("Code Quality")]
 [doc("Lint the API code")]
 lint: source_venv
