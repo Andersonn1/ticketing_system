@@ -5,8 +5,7 @@ from __future__ import annotations
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import Field, SecretStr
-from sqlalchemy.engine import URL
+from pydantic import Field, PostgresDsn, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 VALID_LOG_LEVEL_NAMES = Literal[
@@ -62,16 +61,14 @@ class Settings(BaseSettings):
 
     def database_url(self) -> str:
         """Build the async SQLAlchemy connection URL for PostgreSQL."""
-        return str(
-            URL.create(
-                drivername="postgresql+asyncpg",
-                username=self.db_user,
-                password=self.db_password.get_secret_value(),
-                host=self.db_host,
-                port=self.db_port,
-                database=self.db_name,
-            )
-        )
+        return PostgresDsn.build(
+            scheme="postgresql+asyncpg",
+            username=self.db_user,
+            password=self.db_password.get_secret_value(),
+            host=self.db_host,
+            port=self.db_port,
+            path=self.db_name,
+        ).unicode_string()
 
 
 @lru_cache(maxsize=1)

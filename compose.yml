@@ -12,7 +12,12 @@ services:
     env_file: ./.env
     volumes:
       - ./logs:/app/logs
+      - ./src:/app/src
+      - ./alembic:/app/alembic:rw
+      - ./alembic.ini:/app/alembic.ini:ro
     restart: unless-stopped
+    networks:
+      - service_desk
 
   postgres:
     image: postgres:16-alpine
@@ -24,18 +29,18 @@ services:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ticketing_user -d ticketing_system"]
-      interval: 10s
+      interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 20
     restart: unless-stopped
+    networks:
+      - service_desk
 
   pgadmin:
     image: dpage/pgadmin4:8
     container_name: ticketing-system-pgadmin
     env_file:
       - ./pgadmin.env
-      - ./postgres.env
-    entrypoint: ["/bin/sh", "/pgadmin-init/generate-servers.sh"]
     depends_on:
       postgres:
         condition: service_healthy
@@ -45,6 +50,28 @@ services:
       - pgadmin_data:/var/lib/pgadmin
       - ./pgadmin:/pgadmin-init:ro
     restart: unless-stopped
+    configs:
+      - source: servers
+        target: /pgadmin4/servers.json
+        mode: 0444
+      - source: pgpass
+        target: /pgpass
+        uid: "5050"
+        gid: "5050"
+        mode: 0400
+    networks:
+      - service_desk
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+configs:
+  servers:
+    file: ./pgadmin/servers.json
+  pgpass:
+    file: ./pgadmin/pgpass
+
+networks:
+  service_desk:
 
 volumes:
   postgres_data:

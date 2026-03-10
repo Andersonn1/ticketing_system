@@ -1,4 +1,4 @@
-"""Load Mock Data"""
+"""Legacy helper for loading mock ticket data from disk."""
 
 from __future__ import annotations
 
@@ -7,15 +7,19 @@ from pathlib import Path
 from typing import Any
 
 from loguru import logger
+from src.schemas.service_ticket import ServiceTicketCreate
 
-from src.schemas.service_ticket import ServiceTicket
-
-MOCK_DATA_PATH = Path(__file__).parents[3] / "data/MOCK_DATA.json"
+MOCK_DATA_PATH = Path(__file__).resolve().parents[3] / "data/MOCK_DATA.json"
 
 
-def load_mock_tickets() -> list[ServiceTicket]:
+def load_mock_tickets() -> list[ServiceTicketCreate]:
+    """Load mock ticket rows directly from JSON.
+
+    Runtime code now reads ticket rows through the service/repository layer. This
+    helper is retained for legacy/test bootstrap workflows only.
+    """
     logger.info("Loading mock data from: {}", MOCK_DATA_PATH.as_posix())
-    response = []
+    response: list[ServiceTicketCreate] = []
     if not MOCK_DATA_PATH.exists():
         logger.error("LFailed to load mock data from: {}", MOCK_DATA_PATH.as_posix())
         raise RuntimeError(
@@ -25,5 +29,14 @@ def load_mock_tickets() -> list[ServiceTicket]:
         raw_data = file.read()
         data: list[dict[str, Any]] = json.loads(raw_data)
         for ticket in data:
-            response.append(ServiceTicket(**ticket))
+            response.append(
+                ServiceTicketCreate.model_validate(
+                    {
+                        key: value
+                        for key, value in ticket.items()
+                        if key
+                        in ServiceTicketCreate.model_fields
+                    }
+                )
+            )
     return response

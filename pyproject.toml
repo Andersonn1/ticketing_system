@@ -20,6 +20,7 @@ dependencies = [
     "pydantic>=2.12.5",
     "pydantic-settings>=2.13.1",
     "pywebview>=6.1",
+    "alembic-postgresql-enum>=1.10.0",
 ]
 
 

@@ -37,46 +37,24 @@ This repository is an AI-supported IT ticketing demo built with NiceGUI.
 
 ## Quick Start
 
-1. From the repository root, create and activate a virtual environment:
+1. From the repository root, run:
+
+   ```bash
+   just setup
+   ```
+
+2. Install optional development tools:
+
+   ```bash
+   just setup-dev
+   ```
+
+3. If you prefer manual setup instead of `just setup`, run:
 
    ```bash
    uv venv
-   source .venv/bin/activate
-   ```
-
-2. Install dependencies:
-
-   ```bash
    uv sync
-   ```
-
-3. Install development tools (optional):
-
-   ```bash
-   uv sync --group dev
-   ```
-
-4. Copy the environment template and edit values:
-
-   ```bash
-   cp .env.TEMPLATE .env
-   ```
-
-5. Copy the postgres environment template and edit values:
-
-   ```bash
-   cp postgres.env.TEMPLATE postgres.env
-   ```
-
-6. Copy the pgadmin environment template and edit values:
-
-   ```bash
-   cp pgadmin.env.TEMPLATE pgadmin.env
-   ```
-
-7. Ensure the log directory exists if you changed `LOG_FILE` to a nested path:
-
-   ```bash
+   ./scripts/setup-env-files.sh
    mkdir -p logs
    ```
 
@@ -103,6 +81,10 @@ Note: the `.env` and `.env.TEMPLATE` can include additional variables; only valu
 
 ## Useful `just` Commands
 
+- `just setup`  
+  Creates missing env files from templates, creates `.venv`, installs runtime dependencies, and ensures `logs/` exists.
+- `just setup-dev`  
+  Installs optional development dependencies (`uv sync --group dev`).
 - `just start`  
   Runs the app with the configured virtual environment.
 - `just lint`  
@@ -113,10 +95,11 @@ Note: the `.env` and `.env.TEMPLATE` can include additional variables; only valu
   Runs `ruff format .`.
 - `just migration-new "create service_tickets table"`  
   Creates a new Alembic migration with autogeneration.
+- `alembic upgrade head` runs during application startup via `src.db.migrations` to fail fast if DB or migration state is invalid.
 
 ## Running the App
 
-The application automatically runs `alembic upgrade head` during startup. If migrations fail (for example, DB is unreachable or revision history diverges), startup fails fast.
+The application automatically runs `alembic upgrade head` during startup and then seeds data from `data/MOCK_DATA.json` using the service-layer repository path. If either migrations or seed processing fail (for example, DB is unreachable or credentials are invalid), startup fails fast.
 
 From project root:
 

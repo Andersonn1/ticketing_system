@@ -2,26 +2,27 @@
 
 from __future__ import annotations
 
-from loguru import logger
 from fastapi import Request
+from loguru import logger
 from nicegui import app, ui
 from starlette.middleware.sessions import SessionMiddleware
 
 from src.core.logging import configure_logging
 from src.core.settings import get_settings
 from src.db.migrations import run_startup_migrations
+from src.db.seed import MOCK_DATA_PATH, run_seed
 from src.db.session import close_db_connection
 from src.pages import ai_page, home_page, manual_page
 
 settings = get_settings()
 
+
 # Application startup events
-app.on_startup(configure_logging)
-
-
-async def _run_startup_migrations() -> None:
-    """Run migrations on startup and fail fast on errors."""
+async def _run_startup_tasks() -> None:
+    """Run migrations, then seed data, and fail fast on errors."""
+    configure_logging()
     logger.info("Running database migrations.")
+
     try:
         await run_startup_migrations()
     except Exception as exc:
@@ -29,13 +30,27 @@ async def _run_startup_migrations() -> None:
         raise
     logger.success("Migrations complete.")
 
+    logger.info("Running startup seed for mock ticket data.")
+    try:
+        result = await run_seed(MOCK_DATA_PATH)
+    except Exception as exc:
+        logger.exception("Startup seed failed: {}", exc)
+        raise
+    logger.success(
+        "Seed complete: {} created, {} updated, {} skipped, {} payload(s) processed.",
+        result.summary.created,
+        result.summary.updated,
+        result.summary.skipped,
+        result.payloads_processed,
+    )
+
 
 async def _close_db() -> None:
     """Clean up database connections."""
     await close_db_connection()
 
 
-app.on_startup(_run_startup_migrations)
+app.on_startup(_run_startup_tasks)
 app.on_shutdown(_close_db)
 
 app.add_middleware(

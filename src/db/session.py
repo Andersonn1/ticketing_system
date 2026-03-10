@@ -21,7 +21,6 @@ _session_maker: async_sessionmaker[AsyncSession] | None = None
 def _initialize_session_maker() -> None:
     """Initialize async SQLAlchemy engine and session factory once."""
     global _engine, _session_maker
-
     if _engine is None:
         settings = get_settings()
         _engine = create_async_engine(

@@ -5,7 +5,8 @@ from __future__ import annotations
 from datetime import datetime
 from enum import StrEnum
 
-from sqlalchemy import Boolean, DateTime, Enum, String, Text
+from sqlalchemy import Boolean, DateTime, String, Text, func
+from sqlalchemy.dialects.postgresql import ENUM as PostgresqlEnum
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.db.base import Base
@@ -34,13 +35,23 @@ class ServiceTicketModel(Base):
 
     __tablename__ = "service_tickets"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(
+        primary_key=True, nullable=False, autoincrement=True
+    )
     urgency: Mapped[ServiceUrgency] = mapped_column(
-        Enum(ServiceUrgency, validate_strings=True, native_enum=False),
+        PostgresqlEnum(
+            ServiceUrgency,
+            create_type=True,
+            name="service_urgency",
+        ),
         nullable=False,
     )
     category: Mapped[ServiceCategory] = mapped_column(
-        Enum(ServiceCategory, validate_strings=True, native_enum=False),
+        PostgresqlEnum(
+            ServiceCategory,
+            create_type=True,
+            name="service_category",
+        ),
         nullable=False,
     )
     description: Mapped[str] = mapped_column(Text, nullable=False)
@@ -52,3 +63,14 @@ class ServiceTicketModel(Base):
     )
     error_message_details: Mapped[str | None] = mapped_column(Text, nullable=True)
     assignee: Mapped[str] = mapped_column(String(255), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )

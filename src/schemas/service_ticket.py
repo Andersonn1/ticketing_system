@@ -1,11 +1,11 @@
 """IT Service Ticket Schemas"""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import StrEnum
 
 from pydantic import Field
 
-from src.schemas.base import AuditMixin, BaseSchema
+from src.schemas.base import BaseSchema
 
 
 class ServiceUrgency(StrEnum):
@@ -44,10 +44,19 @@ class ServiceTicketCreate(BaseSchema):
     assignee: str = Field(..., description="Who is the ticket assigned too")
 
 
-class ServiceTicketUpdate(ServiceTicketCreate, AuditMixin):
+class ServiceTicketUpdate(ServiceTicketCreate):
     """The Service Ticket Update Schema"""
 
     id: int = Field(..., description="The unique identifier of the ticket")
+    created_at: datetime | None = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        description="When was the entity created",
+    )
+    updated_at: datetime | None = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        description="When was the entity last updated",
+    )
+    ...
 
 
 class ServiceTicket(ServiceTicketUpdate):
