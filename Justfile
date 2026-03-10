@@ -34,6 +34,11 @@ up:
 start: source_venv
     uv run python -m src.main
 
+[group("Application Migrations")]
+[doc("Create a new database migration")]
+migration-new message="auto migration":
+    uv run alembic revision --autogenerate -m "{{message}}"
+
 [group("Code Quality")]
 [doc("Lint the API code")]
 lint: source_venv

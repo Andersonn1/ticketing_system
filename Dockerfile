@@ -11,7 +11,9 @@ RUN addgroup -g 10001 appuser && \
 
 
 COPY pyproject.toml uv.lock /app/
+COPY alembic.ini /app/alembic.ini
 COPY src /app/src
+COPY alembic /app/alembic
 COPY data /app/data
 
 RUN uv sync --frozen --no-dev \

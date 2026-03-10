@@ -94,8 +94,10 @@ Current app settings are loaded from `.env`:
 - `MODEL_PROVIDER_API_KEY` (required): Provider API key.
 - `DB_NAME` (required): Name of postgres database (Defaults to ticketing_system)
 - `DB_USER` (required): Name of postgres database user (Defaults to ticketing_user)
+- `DB_HOST` (optional): Postgres host (Defaults to localhost)
 - `DB_PASSWORD` (required): Password to postgres database
 - `DB_PORT` (required): Port that postgres is listening on (Defaults to 5432)
+- `DB_HOST` should be `localhost` for local non-container runs and `postgres` in compose.
 
 Note: the `.env` and `.env.TEMPLATE` can include additional variables; only values read by settings are required.
 
@@ -109,8 +111,12 @@ Note: the `.env` and `.env.TEMPLATE` can include additional variables; only valu
   Runs `ruff check --fix .`.
 - `just format`  
   Runs `ruff format .`.
+- `just migration-new "create service_tickets table"`  
+  Creates a new Alembic migration with autogeneration.
 
 ## Running the App
+
+The application automatically runs `alembic upgrade head` during startup. If migrations fail (for example, DB is unreachable or revision history diverges), startup fails fast.
 
 From project root:
 
