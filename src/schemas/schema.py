@@ -61,6 +61,62 @@ class TicketCreateSchema(BaseSchema):
         return value
 
 
+class ManualTriageSchema(BaseSchema):
+    """Payload required for helpdesk workers to manually triage a ticket."""
+
+    summary: str = Field(..., description="The human-authored summary of the issue")
+    response: str = Field(..., description="The response the helpdesk worker will send")
+    next_steps: list[str] = Field(default_factory=list, description="Human-authored next steps")
+    priority: ServicePriority = Field(..., description="The priority assigned by the helpdesk worker")
+    category: ServiceCategory = Field(..., description="The category assigned by the helpdesk worker")
+    status: ServiceStatus = Field(..., description="The manual triage workflow status")
+
+    @field_validator("summary", "response", mode="before")
+    @classmethod
+    def strip_text_fields(cls, value: object) -> object:
+        """Trim user-entered string fields before validating them."""
+        if isinstance(value, str):
+            return value.strip()
+        return value
+
+    @field_validator("summary")
+    @classmethod
+    def validate_summary(cls, value: str) -> str:
+        if not value:
+            raise ValueError("Enter a triage summary.")
+        return value
+
+    @field_validator("response")
+    @classmethod
+    def validate_response(cls, value: str) -> str:
+        if not value:
+            raise ValueError("Enter a response for the requester.")
+        return value
+
+    @field_validator("next_steps", mode="before")
+    @classmethod
+    def strip_next_steps(cls, value: object) -> object:
+        """Trim whitespace from next-step entries before validation."""
+        if isinstance(value, list):
+            return [step.strip() if isinstance(step, str) else step for step in value]
+        return value
+
+    @field_validator("next_steps")
+    @classmethod
+    def validate_next_steps(cls, value: list[str]) -> list[str]:
+        cleaned = [step for step in value if step]
+        if not cleaned:
+            raise ValueError("Enter at least one next step.")
+        return cleaned
+
+    @field_validator("status")
+    @classmethod
+    def validate_status(cls, value: ServiceStatus) -> ServiceStatus:
+        if value not in {ServiceStatus.PENDING, ServiceStatus.CLOSED}:
+            raise ValueError("Manual triage status must be Pending or Closed.")
+        return value
+
+
 class TriageResultSchema(BaseSchema):
     """Structured LLM response saved onto a ticket."""
 
@@ -118,6 +174,9 @@ class TicketResponseSchema(BaseSchema):
     ai_summary: str | None = Field(default=None, description="The AI summary for the ticket")
     ai_response: str | None = Field(default=None, description="The AI response to the ticket")
     ai_next_steps: list[str] = Field(default_factory=list, description="Next steps provided by the AI")
+    manual_summary: str | None = Field(default=None, description="The manual summary for the ticket")
+    manual_response: str | None = Field(default=None, description="The human-authored response to the ticket")
+    manual_next_steps: list[str] = Field(default_factory=list, description="Next steps provided by a helpdesk worker")
     ai_confidence: AIConfidence | None = Field(default=None, description="The AI's confidence level of its response")
     ai_trace: TicketAITraceSchema | None = Field(
         default=None,

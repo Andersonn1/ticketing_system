@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models import TicketModel
 from src.schemas import (
+    ManualTriageSchema,
     TicketCreateSchema,
     TicketResponseSchema,
     TicketUpdateSchema,
@@ -55,6 +56,14 @@ class TicketServiceContract(Protocol):
 
     async def update_ticket(self, ticket_id: int, payload: TicketUpdateSchema) -> TicketResponseSchema | None:
         """Update a ticket by ID."""
+        ...
+
+    async def manual_triage_ticket(
+        self,
+        ticket_id: int,
+        payload: ManualTriageSchema,
+    ) -> TicketResponseSchema | None:
+        """Persist manual triage content and worker-selected triage fields."""
         ...
 
     async def delete_ticket(self, ticket_id: int) -> bool:

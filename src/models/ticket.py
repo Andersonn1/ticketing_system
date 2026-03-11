@@ -90,6 +90,9 @@ class TicketModel(Base):
     ai_summary: Mapped[str | None] = mapped_column(Text, nullable=True)
     ai_response: Mapped[str | None] = mapped_column(Text, nullable=True)
     ai_next_steps: Mapped[list[str]] = mapped_column(JSONB, nullable=False, server_default=text("'[]'::jsonb"))
+    manual_summary: Mapped[str | None] = mapped_column(Text, nullable=True)
+    manual_response: Mapped[str | None] = mapped_column(Text, nullable=True)
+    manual_next_steps: Mapped[list[str]] = mapped_column(JSONB, nullable=False, server_default=text("'[]'::jsonb"))
     ai_confidence: Mapped[AIConfidence | None] = mapped_column(
         Enum(AIConfidence, name="ai_confidence", create_constraint=False),
         nullable=True,

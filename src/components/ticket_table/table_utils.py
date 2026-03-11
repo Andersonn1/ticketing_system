@@ -50,14 +50,14 @@ def add_expandable_row(table: Table) -> Table:
                             {{ col.value }}
                         </q-badge>
                     </q-td>
-                    <q-td v-else-if="col.name === 'start'" :props="props" :key="col.name">
+                    <q-td v-else-if="col.name === 'triage'" :props="props" :key="col.name">
                         <q-btn
                             flat
-                            color="primary"
+                            color="secondary"
                             no-caps
-                            :label="props.row.start"
-                            :disable="props.row.status !== 'Open'"
-                            @click.stop="$parent.$emit('ticket-start', props.row)"
+                            :label="props.row.triage"
+                            :disable="!['Open', 'Pending'].includes(props.row.status)"
+                            @click.stop="$parent.$emit('ticket-triage', props.row)"
                         />
                     </q-td>
                     <q-td v-else-if="col.name === 'close'" :props="props" :key="col.name">
@@ -95,6 +95,27 @@ def add_expandable_row(table: Table) -> Table:
                                 </q-card-section>
                                 <q-separator vertical />
                                 <q-card-section>
+                                    <q-item>
+                                        <q-item-section>
+                                            <q-item-label>Manual Triage</q-item-label>
+                                            <div v-if="props.row.manual_summary || props.row.manual_response || (props.row.manual_next_steps && props.row.manual_next_steps.length)">
+                                                <div class="text-caption q-mt-sm">Summary</div>
+                                                <q-item-label caption>{{ props.row.manual_summary }}</q-item-label>
+                                                <q-separator spaced inset />
+                                                <div class="text-caption q-mt-sm">Response</div>
+                                                <q-item-label caption>{{ props.row.manual_response }}</q-item-label>
+                                                <q-separator spaced inset />
+                                                <div class="text-caption q-mt-sm">Next Steps</div>
+                                                <q-list bordered separator>
+                                                    <q-item v-for="step in props.row.manual_next_steps" :key="'manual-' + step" clickable v-ripple>
+                                                        {{ step }}
+                                                    </q-item>
+                                                </q-list>
+                                            </div>
+                                            <q-item-label v-else caption>No manual triage saved for this ticket yet.</q-item-label>
+                                        </q-item-section>
+                                    </q-item>
+                                    <q-separator spaced inset />
                                     <q-item>
                                         <q-item-section auto-width>
                                             <q-item-label>AI Summary</q-item-label>

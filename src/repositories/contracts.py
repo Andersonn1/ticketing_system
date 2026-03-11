@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models import KBChunkModel, ServiceStatus, TicketEmbeddingModel, TicketModel
 from src.schemas import (
+    ManualTriageSchema,
     RetrievedKBMatchSchema,
     RetrievedTicketMatchSchema,
     TicketAITraceSchema,
@@ -73,6 +74,10 @@ class TicketRepositoryContract(Protocol):
         trace: TicketAITraceSchema,
     ) -> TicketModel:
         """Persist AI triage fields onto a ticket."""
+        ...
+
+    async def apply_manual_triage(self, ticket: TicketModel, payload: ManualTriageSchema) -> TicketModel:
+        """Persist manual triage fields onto a ticket."""
         ...
 
     async def delete(self, ticket_id: int) -> bool:

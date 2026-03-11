@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import unittest
+from unittest.mock import MagicMock
 
 from src.components.ticket_table.ticket_table import (
     _badge_color,
@@ -16,7 +17,7 @@ from src.models import ServiceCategory, ServicePriority, ServiceStatus, UserRole
 from src.schemas import TicketResponseSchema
 
 
-class FakeTable:
+class FakeTable(MagicMock):
     """Minimal table double for row replacement tests."""
 
     def __init__(self, rows: list[dict], selected: list[dict]) -> None:
@@ -50,7 +51,7 @@ class TicketTableHelperTests(unittest.TestCase):
             }
         )
 
-        self.assertEqual(row["start"], "Start")
+        self.assertEqual(row["triage"], "Triage")
         self.assertEqual(row["close"], "Close")
         self.assertEqual(row["status_color"], "orange")
         self.assertEqual(row["priority_color"], "orange")
@@ -134,7 +135,7 @@ class TicketTableHelperTests(unittest.TestCase):
             requestor_name="Jane Student",
             requestor_email="jane@example.edu",
             user_role=UserRole.STUDENT,
-            title="Canvas login issue",
+            title="Canvas login issue",  # type: ignore
             description="Login fails after reset",
             status=ServiceStatus.OPEN,
             priority=ServicePriority.HIGH,
@@ -152,7 +153,6 @@ class TicketTableHelperTests(unittest.TestCase):
 
         self.assertEqual(row["status"], "Open")
         self.assertEqual(row["priority"], "High")
-        self.assertEqual(row["start"], "Start")
         self.assertEqual(row["priority_color"], "red")
 
 

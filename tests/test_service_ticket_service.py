@@ -15,6 +15,7 @@ from src.models import (
     UserRole,
 )
 from src.schemas import (
+    ManualTriageSchema,
     RetrievedKBMatchSchema,
     RetrievedTicketMatchSchema,
     TicketUpdateSchema,
@@ -51,6 +52,9 @@ class ServiceTicketServiceTests(unittest.IsolatedAsyncioTestCase):
             ai_summary=None,
             ai_response=None,
             ai_next_steps=[],
+            manual_summary=None,
+            manual_response=None,
+            manual_next_steps=[],
             ai_confidence=None,
             ai_trace=None,
         )
@@ -78,11 +82,12 @@ class ServiceTicketServiceTests(unittest.IsolatedAsyncioTestCase):
         self.ticket_repository.get_by_id_for_update = AsyncMock(
             side_effect=lambda ticket_id: self.fake_ticket if ticket_id == self.fake_ticket.id else None
         )
-        self.ticket_repository.claim_for_triage = AsyncMock(
-            side_effect=self._claim_for_triage
+        self.ticket_repository.claim_for_triage = AsyncMock(side_effect=self._claim_for_triage)
+        self.ticket_repository.set_status = AsyncMock(
+            side_effect=lambda ticket, status: setattr(ticket, "status", status)
         )
-        self.ticket_repository.set_status = AsyncMock(side_effect=lambda ticket, status: setattr(ticket, "status", status))
         self.ticket_repository.apply_triage = AsyncMock(side_effect=lambda ticket, triage, trace: ticket)
+        self.ticket_repository.apply_manual_triage = AsyncMock(side_effect=self._apply_manual_triage)
         self.kb_repository.search_similar = AsyncMock(
             return_value=[
                 RetrievedKBMatchSchema(
@@ -122,6 +127,15 @@ class ServiceTicketServiceTests(unittest.IsolatedAsyncioTestCase):
             return None
         self.fake_ticket.status = ServiceStatus.PENDING
         return self.fake_ticket
+
+    def _apply_manual_triage(self, ticket: TicketModel, payload: ManualTriageSchema) -> TicketModel:
+        ticket.manual_summary = payload.summary
+        ticket.manual_response = payload.response
+        ticket.manual_next_steps = payload.next_steps
+        ticket.priority = payload.priority
+        ticket.category = payload.category
+        ticket.status = payload.status
+        return ticket
 
     async def asyncTearDown(self) -> None:
         self.embedding_repository_patch.stop()
@@ -187,6 +201,44 @@ class ServiceTicketServiceTests(unittest.IsolatedAsyncioTestCase):
                 self._update_payload(status=ServiceStatus.CLOSED),
             )
 
+    async def test_manual_triage_ticket_saves_manual_fields_for_open_ticket(self) -> None:
+        service = TicketService(
+            session_provider=self.fake_get_session,
+            ollama_client=self.llm_client,
+        )
+
+        result = await service.manual_triage_ticket(7, self._manual_triage_payload(status=ServiceStatus.PENDING))
+
+        self.assertEqual(result.status, ServiceStatus.PENDING)
+        self.assertEqual(result.manual_summary, "Investigated Canvas login sync issue.")
+        self.assertEqual(result.manual_response, "We advised the student to wait for the sync delay to clear.")
+        self.assertEqual(result.manual_next_steps, ["Wait 15 minutes.", "Retry Canvas after clearing cache."])
+        self.ticket_repository.apply_manual_triage.assert_awaited_once()
+        self.fake_session.commit.assert_awaited()
+
+    async def test_manual_triage_ticket_allows_pending_ticket_to_be_resaved(self) -> None:
+        self.fake_ticket.status = ServiceStatus.PENDING
+        service = TicketService(
+            session_provider=self.fake_get_session,
+            ollama_client=self.llm_client,
+        )
+
+        result = await service.manual_triage_ticket(7, self._manual_triage_payload(status=ServiceStatus.CLOSED))
+
+        self.assertEqual(result.status, ServiceStatus.CLOSED)
+        self.assertEqual(result.priority, ServicePriority.MEDIUM)
+        self.assertEqual(result.category, ServiceCategory.SOFTWARE)
+
+    async def test_manual_triage_ticket_rejects_closed_ticket(self) -> None:
+        self.fake_ticket.status = ServiceStatus.CLOSED
+        service = TicketService(
+            session_provider=self.fake_get_session,
+            ollama_client=self.llm_client,
+        )
+
+        with self.assertRaisesRegex(ValueError, "already been closed"):
+            await service.manual_triage_ticket(7, self._manual_triage_payload(status=ServiceStatus.CLOSED))
+
     def _update_payload(self, *, status: ServiceStatus) -> TicketUpdateSchema:
         return TicketUpdateSchema(
             id=self.fake_ticket.id,
@@ -198,6 +250,16 @@ class ServiceTicketServiceTests(unittest.IsolatedAsyncioTestCase):
             status=status,
             priority=self.fake_ticket.priority,
             category=self.fake_ticket.category,
+        )
+
+    def _manual_triage_payload(self, *, status: ServiceStatus) -> ManualTriageSchema:
+        return ManualTriageSchema(
+            summary="Investigated Canvas login sync issue.",
+            response="We advised the student to wait for the sync delay to clear.",
+            next_steps=["Wait 15 minutes.", "Retry Canvas after clearing cache."],
+            priority=ServicePriority.MEDIUM,
+            category=ServiceCategory.SOFTWARE,
+            status=status,
         )
 
 

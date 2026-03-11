@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models import ServiceStatus, TicketModel
 from src.schemas import (
+    ManualTriageSchema,
     TicketAITraceSchema,
     TicketCreateSchema,
     TicketUpdateSchema,
@@ -39,9 +40,7 @@ class TicketRepository(TicketRepositoryContract):
 
     async def get_by_id_for_update(self, ticket_id: int) -> TicketModel | None:
         """Load and lock a single ticket by primary key for mutation."""
-        result = await self._session.execute(
-            select(TicketModel).where(TicketModel.id == ticket_id).with_for_update()
-        )
+        result = await self._session.execute(select(TicketModel).where(TicketModel.id == ticket_id).with_for_update())
         return result.scalar_one_or_none()
 
     async def get_by_ids(self, ticket_ids: Sequence[int]) -> list[TicketModel]:
@@ -137,6 +136,29 @@ class TicketRepository(TicketRepositoryContract):
         await self._session.flush()
         await self._session.refresh(ticket)
         logger.debug("Persisted AI triage output for ticket {}.", ticket.id)
+        return ticket
+
+    async def apply_manual_triage(
+        self,
+        ticket: TicketModel,
+        payload: ManualTriageSchema,
+    ) -> TicketModel:
+        """Persist helpdesk-authored triage output onto a ticket."""
+        logger.info(
+            "Persisting manual triage output for ticket {} with category {} and priority {}.",
+            ticket.id,
+            payload.category,
+            payload.priority,
+        )
+        ticket.manual_summary = payload.summary
+        ticket.manual_response = payload.response
+        ticket.manual_next_steps = payload.next_steps
+        ticket.priority = payload.priority
+        ticket.category = payload.category
+        ticket.status = payload.status
+        await self._session.flush()
+        await self._session.refresh(ticket)
+        logger.debug("Persisted manual triage output for ticket {}.", ticket.id)
         return ticket
 
     async def delete(self, ticket_id: int) -> bool:

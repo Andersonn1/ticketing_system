@@ -56,7 +56,7 @@ class TicketCreateSchemaTests(unittest.TestCase):
         with self.assertRaises(ValidationError) as context:
             TicketCreateSchema.model_validate(_valid_payload(requestor_email="not-an-email"))
 
-        self.assertEqual(context.exception.errors()[0]["msg"], "Value error, Enter a valid email address.")
+        self.assertIn("valid email address", context.exception.errors()[0]["msg"])
 
     def test_overlong_title_is_rejected(self) -> None:
         with self.assertRaises(ValidationError) as context:

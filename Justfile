@@ -66,3 +66,8 @@ lint-fix: source_venv
 [doc("Format the API code")]
 format: source_venv
     ruff format .
+
+[group("Code Quality")]
+[doc("Run the test suite with optional pytest args")]
+test *args='':
+    pytest {{args}}

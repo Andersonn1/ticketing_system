@@ -19,11 +19,12 @@ from src.schemas import TicketUpdateSchema
 from src.schemas.schema import TicketResponseSchema
 from src.services import TicketService
 
+from .manual_triage_modal import create_manual_triage_opener
 from .table_config import COLUMN_DEFAULTS, COLUMNS
 from .table_utils import add_expandable_row, add_search
 
 _ACTION_LABELS = {
-    "start": "Start",
+    "triage": "Triage",
     "close": "Close",
 }
 
@@ -115,6 +116,10 @@ def ticket_table(title: str, data: list[TicketResponseSchema], service: TicketSe
         selection="multiple",
         pagination=10,
     ).classes("w-full") as table:
+        open_manual_triage = create_manual_triage_opener(
+            service=service,
+            on_ticket_updated=lambda updated_ticket: _sync_table_row(table, updated_ticket),
+        )
 
         async def set_ticket_status(row: dict[str, Any], status: ServiceStatus) -> None:
             ticket_id = int(row["id"])
@@ -150,6 +155,6 @@ def ticket_table(title: str, data: list[TicketResponseSchema], service: TicketSe
 
         table = add_search(table=table)
         table = add_expandable_row(table=table)
-        table.on("ticket-start", handler=lambda e: set_ticket_status(e.args, ServiceStatus.PENDING))
+        table.on("ticket-triage", handler=lambda e: open_manual_triage(e.args))
         table.on("ticket-close", handler=lambda e: set_ticket_status(e.args, ServiceStatus.CLOSED))
     return table

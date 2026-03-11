@@ -23,6 +23,7 @@ from src.repositories import (
     TicketRepository,
 )
 from src.schemas import (
+    ManualTriageSchema,
     TicketCreateSchema,
     TicketResponseSchema,
     TicketUpdateSchema,
@@ -92,6 +93,25 @@ class TicketService(TicketServiceContract):
             row = await repository.update(row, payload)
             await session.commit()
             logger.info("Updated ticket {}.", ticket_id)
+            return self._to_schema(row)
+
+    async def manual_triage_ticket(
+        self,
+        ticket_id: int,
+        payload: ManualTriageSchema,
+    ) -> TicketResponseSchema | None:
+        """Persist manual triage content and worker-selected triage fields."""
+        logger.info("Saving manual triage for ticket {}.", ticket_id)
+        async with self._session_provider() as session:
+            repository = TicketRepository(session)
+            row = await repository.get_by_id_for_update(ticket_id)
+            if row is None:
+                logger.warning("Unable to manually triage ticket {} because it was not found.", ticket_id)
+                return None
+            self._validate_manual_triage_transition(ticket_id, row.status, payload.status)
+            row = await repository.apply_manual_triage(row, payload)
+            await session.commit()
+            logger.info("Saved manual triage for ticket {}.", ticket_id)
             return self._to_schema(row)
 
     async def delete_ticket(self, ticket_id: int) -> bool:
@@ -295,6 +315,27 @@ class TicketService(TicketServiceContract):
         )
 
     @staticmethod
+    def _validate_manual_triage_transition(
+        ticket_id: int,
+        current_status: ServiceStatus,
+        requested_status: ServiceStatus,
+    ) -> None:
+        """Allow manual triage while a ticket is open or pending, but never after closure."""
+        allowed_transitions = {
+            (ServiceStatus.OPEN, ServiceStatus.PENDING),
+            (ServiceStatus.OPEN, ServiceStatus.CLOSED),
+            (ServiceStatus.PENDING, ServiceStatus.PENDING),
+            (ServiceStatus.PENDING, ServiceStatus.CLOSED),
+        }
+        if (current_status, requested_status) in allowed_transitions:
+            return
+        if current_status == ServiceStatus.CLOSED:
+            raise ValueError(f"Ticket {ticket_id} has already been closed and cannot be manually triaged.")
+        raise ValueError(
+            f"Ticket {ticket_id} cannot move from {current_status.value.title()} to {requested_status.value.title()}."
+        )
+
+    @staticmethod
     def _to_schema(row: TicketModel) -> TicketResponseSchema:
         ticket_payload = {
             "id": row.id,
@@ -309,6 +350,9 @@ class TicketService(TicketServiceContract):
             "ai_summary": row.ai_summary,
             "ai_response": row.ai_response,
             "ai_next_steps": row.ai_next_steps or [],
+            "manual_summary": row.manual_summary,
+            "manual_response": row.manual_response,
+            "manual_next_steps": row.manual_next_steps or [],
             "ai_confidence": row.ai_confidence,
             "ai_trace": row.ai_trace,
             "created_at": row.created_at,

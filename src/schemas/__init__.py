@@ -1,6 +1,7 @@
 """Application Schemas"""
 
 from src.schemas.schema import (
+    ManualTriageSchema,
     RetrievedKBMatchSchema,
     RetrievedTicketMatchSchema,
     TicketCreateSchema,
@@ -11,6 +12,7 @@ from src.schemas.schema import (
 )
 
 __all__ = [
+    "ManualTriageSchema",
     "RetrievedKBMatchSchema",
     "RetrievedTicketMatchSchema",
     "TicketAITraceSchema",

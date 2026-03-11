@@ -91,9 +91,9 @@ COLUMNS: Final[list[dict[str, str | bool]]] = [
         "align": "center",
     },
     {
-        "name": "start",
-        "label": "Start",
-        "field": "start",
+        "name": "triage",
+        "label": "Triage",
+        "field": "triage",
         "align": "center",
         "sortable": False,
     },
