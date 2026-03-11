@@ -56,6 +56,7 @@ def add_expandable_row(table: Table) -> Table:
                             color="primary"
                             no-caps
                             :label="props.row.start"
+                            :disable="props.row.status !== 'Open'"
                             @click.stop="$parent.$emit('ticket-start', props.row)"
                         />
                     </q-td>
@@ -65,6 +66,7 @@ def add_expandable_row(table: Table) -> Table:
                             color="negative"
                             no-caps
                             :label="props.row.close"
+                            :disable="props.row.status !== 'Open'"
                             @click.stop="$parent.$emit('ticket-close', props.row)"
                         />
                     </q-td>

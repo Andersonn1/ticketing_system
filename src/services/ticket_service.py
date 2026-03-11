@@ -16,7 +16,7 @@ from src.llm.triage import (
     build_query_text,
     build_ticket_embedding_text,
 )
-from src.models import TicketModel
+from src.models import ServiceStatus, TicketModel
 from src.repositories import (
     KBChunkRepository,
     TicketEmbeddingRepository,
@@ -84,10 +84,11 @@ class TicketService(TicketServiceContract):
         logger.info("Updating ticket {}.", ticket_id)
         async with self._session_provider() as session:
             repository = TicketRepository(session)
-            row = await repository.get_by_id(ticket_id)
+            row = await repository.get_by_id_for_update(ticket_id)
             if row is None:
                 logger.warning("Unable to update ticket {} because it was not found.", ticket_id)
                 return None
+            self._validate_manual_status_transition(ticket_id, row.status, payload.status)
             row = await repository.update(row, payload)
             await session.commit()
             logger.info("Updated ticket {}.", ticket_id)
@@ -157,12 +158,28 @@ class TicketService(TicketServiceContract):
             ticket_repository = TicketRepository(session)
             kb_repository = KBChunkRepository(session)
             embedding_repository = TicketEmbeddingRepository(session)
-            try:
-                ticket = await ticket_repository.get_by_id(ticket_id)
-                if ticket is None:
+            ticket = await ticket_repository.claim_for_triage(ticket_id)
+            if ticket is None:
+                current_ticket = await ticket_repository.get_by_id(ticket_id)
+                if current_ticket is None:
                     logger.warning("AI triage failed because ticket {} was not found.", ticket_id)
                     raise ValueError(f"Ticket {ticket_id} was not found")
+                if current_ticket.status == ServiceStatus.PENDING:
+                    logger.warning("Ticket {} is already being triaged.", ticket_id)
+                    raise ValueError(f"Ticket {ticket_id} is already being triaged")
+                logger.warning(
+                    "Ticket {} cannot be triaged because it is currently {}.",
+                    ticket_id,
+                    current_ticket.status,
+                )
+                raise ValueError(
+                    f"Ticket {ticket_id} cannot be triaged because it is {current_ticket.status.value.title()}"
+                )
 
+            await session.commit()
+            await session.refresh(ticket)
+            logger.info("Ticket {} claimed for triage and moved to Pending.", ticket_id)
+            try:
                 query_text = build_query_text(ticket)
                 query_embedding = await self._ollama_client.embed_text(query_text)
                 logger.debug("Generated query embedding for ticket {}.", ticket_id)
@@ -191,6 +208,7 @@ class TicketService(TicketServiceContract):
                     combined_text=build_ticket_embedding_text(ticket),
                     embedding=query_embedding,
                 )
+                await ticket_repository.set_status(ticket, ServiceStatus.CLOSED)
                 await session.commit()
                 await session.refresh(ticket)
                 logger.info(
@@ -201,6 +219,15 @@ class TicketService(TicketServiceContract):
                 return self._to_schema(ticket)
             except Exception:
                 logger.exception("AI triage failed for ticket {}.", ticket_id)
+                await session.rollback()
+                try:
+                    current_ticket = await ticket_repository.get_by_id(ticket_id)
+                    if current_ticket is not None and current_ticket.status == ServiceStatus.PENDING:
+                        await ticket_repository.set_status(current_ticket, ServiceStatus.OPEN)
+                        await session.commit()
+                        logger.info("Reset ticket {} back to Open after triage failure.", ticket_id)
+                except Exception:
+                    logger.exception("Unable to reset ticket {} after triage failure.", ticket_id)
                 raise
 
     async def triage_tickets(self, ticket_ids: list[int]) -> TriageBatchResult:
@@ -241,6 +268,30 @@ class TicketService(TicketServiceContract):
             or entity.user_role != payload.user_role
             or entity.title != payload.title
             or entity.description != payload.description
+        )
+
+    @staticmethod
+    def _validate_manual_status_transition(
+        ticket_id: int,
+        current_status: ServiceStatus,
+        requested_status: ServiceStatus | None,
+    ) -> None:
+        """Reject manual transitions that conflict with triage ownership."""
+        if requested_status is None or requested_status == current_status:
+            return
+
+        allowed_transitions = {
+            (ServiceStatus.OPEN, ServiceStatus.PENDING),
+            (ServiceStatus.OPEN, ServiceStatus.CLOSED),
+        }
+        if (current_status, requested_status) in allowed_transitions:
+            return
+
+        if current_status == ServiceStatus.PENDING:
+            raise ValueError(f"Ticket {ticket_id} is currently being triaged and cannot be updated.")
+
+        raise ValueError(
+            f"Ticket {ticket_id} cannot move from {current_status.value.title()} to {requested_status.value.title()}."
         )
 
     @staticmethod

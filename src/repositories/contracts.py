@@ -7,7 +7,7 @@ from typing import Any, Protocol
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.models import KBChunkModel, TicketEmbeddingModel, TicketModel
+from src.models import KBChunkModel, ServiceStatus, TicketEmbeddingModel, TicketModel
 from src.schemas import (
     RetrievedKBMatchSchema,
     RetrievedTicketMatchSchema,
@@ -31,6 +31,10 @@ class TicketRepositoryContract(Protocol):
         """Load a single ticket by primary key."""
         ...
 
+    async def get_by_id_for_update(self, ticket_id: int) -> TicketModel | None:
+        """Load and lock a single ticket by primary key for mutation."""
+        ...
+
     async def get_by_ids(self, ticket_ids: Sequence[int]) -> list[TicketModel]:
         """Load multiple tickets preserving database ordering."""
         ...
@@ -52,6 +56,14 @@ class TicketRepositoryContract(Protocol):
         payload: TicketCreateSchema | TicketUpdateSchema,
     ) -> TicketModel:
         """Patch an existing row in memory."""
+        ...
+
+    async def claim_for_triage(self, ticket_id: int) -> TicketModel | None:
+        """Atomically move an open ticket into pending triage state."""
+        ...
+
+    async def set_status(self, ticket: TicketModel, status: ServiceStatus) -> TicketModel:
+        """Update only the ticket status."""
         ...
 
     async def apply_triage(

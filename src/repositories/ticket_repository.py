@@ -8,7 +8,7 @@ from loguru import logger
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.models import TicketModel
+from src.models import ServiceStatus, TicketModel
 from src.schemas import (
     TicketAITraceSchema,
     TicketCreateSchema,
@@ -35,6 +35,13 @@ class TicketRepository(TicketRepositoryContract):
     async def get_by_id(self, ticket_id: int) -> TicketModel | None:
         """Load a single ticket by primary key."""
         result = await self._session.execute(select(TicketModel).where(TicketModel.id == ticket_id))
+        return result.scalar_one_or_none()
+
+    async def get_by_id_for_update(self, ticket_id: int) -> TicketModel | None:
+        """Load and lock a single ticket by primary key for mutation."""
+        result = await self._session.execute(
+            select(TicketModel).where(TicketModel.id == ticket_id).with_for_update()
+        )
         return result.scalar_one_or_none()
 
     async def get_by_ids(self, ticket_ids: Sequence[int]) -> list[TicketModel]:
@@ -77,6 +84,32 @@ class TicketRepository(TicketRepositoryContract):
     ) -> TicketModel:
         """Patch an existing row in memory."""
         self._apply_create_payload(ticket, payload)
+        await self._session.flush()
+        await self._session.refresh(ticket)
+        return ticket
+
+    async def claim_for_triage(self, ticket_id: int) -> TicketModel | None:
+        """Lock and mark an open ticket as pending so only one triage flow owns it."""
+        result = await self._session.execute(
+            select(TicketModel)
+            .where(
+                TicketModel.id == ticket_id,
+                TicketModel.status == ServiceStatus.OPEN,
+            )
+            .with_for_update(skip_locked=True)
+        )
+        ticket = result.scalar_one_or_none()
+        if ticket is None:
+            return None
+
+        ticket.status = ServiceStatus.PENDING
+        await self._session.flush()
+        await self._session.refresh(ticket)
+        return ticket
+
+    async def set_status(self, ticket: TicketModel, status: ServiceStatus) -> TicketModel:
+        """Persist a status-only transition."""
+        ticket.status = status
         await self._session.flush()
         await self._session.refresh(ticket)
         return ticket

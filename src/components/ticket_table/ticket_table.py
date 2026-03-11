@@ -130,7 +130,12 @@ def ticket_table(title: str, data: list[TicketResponseSchema], service: TicketSe
                 current_status,
                 status,
             )
-            updated_ticket = await service.update_ticket(ticket_id, _build_update_payload(row, status))
+            try:
+                updated_ticket = await service.update_ticket(ticket_id, _build_update_payload(row, status))
+            except ValueError as exc:
+                logger.warning("Unable to update ticket {} from the table UI: {}", ticket_id, exc)
+                ui.notify(str(exc), color="warning")
+                return
             if updated_ticket is None:
                 logger.warning("Unable to update ticket {} because it was not found.", ticket_id)
                 ui.notify(f"Ticket {ticket_id} was not found.", color="negative")

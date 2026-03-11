@@ -17,6 +17,7 @@ from src.models import (
 from src.schemas import (
     RetrievedKBMatchSchema,
     RetrievedTicketMatchSchema,
+    TicketUpdateSchema,
     TriageResultSchema,
 )
 from src.services.contracts import SupportsTriageLLMContract
@@ -29,6 +30,7 @@ class FakeSession:
     def __init__(self) -> None:
         self.commit = AsyncMock()
         self.refresh = AsyncMock()
+        self.rollback = AsyncMock()
 
 
 class ServiceTicketServiceTests(unittest.IsolatedAsyncioTestCase):
@@ -73,6 +75,13 @@ class ServiceTicketServiceTests(unittest.IsolatedAsyncioTestCase):
         self.ticket_repository.get_by_id = AsyncMock(
             side_effect=lambda ticket_id: self.fake_ticket if ticket_id == self.fake_ticket.id else None
         )
+        self.ticket_repository.get_by_id_for_update = AsyncMock(
+            side_effect=lambda ticket_id: self.fake_ticket if ticket_id == self.fake_ticket.id else None
+        )
+        self.ticket_repository.claim_for_triage = AsyncMock(
+            side_effect=self._claim_for_triage
+        )
+        self.ticket_repository.set_status = AsyncMock(side_effect=lambda ticket, status: setattr(ticket, "status", status))
         self.ticket_repository.apply_triage = AsyncMock(side_effect=lambda ticket, triage, trace: ticket)
         self.kb_repository.search_similar = AsyncMock(
             return_value=[
@@ -108,6 +117,12 @@ class ServiceTicketServiceTests(unittest.IsolatedAsyncioTestCase):
             confidence=AIConfidence.HIGH,
         )
 
+    def _claim_for_triage(self, ticket_id: int) -> TicketModel | None:
+        if ticket_id != self.fake_ticket.id or self.fake_ticket.status != ServiceStatus.OPEN:
+            return None
+        self.fake_ticket.status = ServiceStatus.PENDING
+        return self.fake_ticket
+
     async def asyncTearDown(self) -> None:
         self.embedding_repository_patch.stop()
         self.kb_repository_patch.stop()
@@ -121,10 +136,13 @@ class ServiceTicketServiceTests(unittest.IsolatedAsyncioTestCase):
 
         result = await service.triage_ticket(7)
 
+        self.assertEqual(result.status, ServiceStatus.CLOSED)
         self.assertEqual(result.priority.value, "low")
+        self.ticket_repository.claim_for_triage.assert_awaited_once_with(7)
+        self.ticket_repository.set_status.assert_awaited()
         self.embedding_repository.search_similar.assert_awaited_once()
         self.embedding_repository.upsert.assert_awaited_once()
-        self.fake_session.commit.assert_awaited_once()
+        self.assertEqual(self.fake_session.commit.await_count, 2)
 
     async def test_triage_tickets_collects_failures(self) -> None:
         service = TicketService(
@@ -145,6 +163,42 @@ class ServiceTicketServiceTests(unittest.IsolatedAsyncioTestCase):
 
         with self.assertRaisesRegex(ValueError, "Ticket 999 was not found"):
             await service.triage_ticket(999)
+
+    async def test_triage_ticket_rejects_ticket_already_pending(self) -> None:
+        self.fake_ticket.status = ServiceStatus.PENDING
+        service = TicketService(
+            session_provider=self.fake_get_session,
+            ollama_client=self.llm_client,
+        )
+
+        with self.assertRaisesRegex(ValueError, "already being triaged"):
+            await service.triage_ticket(7)
+
+    async def test_update_ticket_rejects_manual_change_while_pending(self) -> None:
+        self.fake_ticket.status = ServiceStatus.PENDING
+        service = TicketService(
+            session_provider=self.fake_get_session,
+            ollama_client=self.llm_client,
+        )
+
+        with self.assertRaisesRegex(ValueError, "currently being triaged"):
+            await service.update_ticket(
+                7,
+                self._update_payload(status=ServiceStatus.CLOSED),
+            )
+
+    def _update_payload(self, *, status: ServiceStatus) -> TicketUpdateSchema:
+        return TicketUpdateSchema(
+            id=self.fake_ticket.id,
+            requestor_name=self.fake_ticket.requestor_name,
+            requestor_email=self.fake_ticket.requestor_email,
+            user_role=self.fake_ticket.user_role,
+            title=self.fake_ticket.title,
+            description=self.fake_ticket.description,
+            status=status,
+            priority=self.fake_ticket.priority,
+            category=self.fake_ticket.category,
+        )
 
 
 if __name__ == "__main__":
