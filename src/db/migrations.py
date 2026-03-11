@@ -75,21 +75,21 @@ def _upgrade_to_head(config: Config) -> None:
     logger.info("Running Alembic Upgrade Complete")
 
 
-async def _assert_service_tickets_table(engine_url: str) -> None:
-    """Ensure the primary service ticket table exists after migrations."""
+async def _assert_ticket_table(engine_url: str) -> None:
+    """Ensure the primary ticket table exists after migrations."""
     engine: AsyncEngine = create_async_engine(engine_url, future=True)
     try:
         async with engine.connect() as connection:
             result = await connection.execute(
                 text(
                     """
-                    SELECT to_regclass('public.service_tickets')
+                    SELECT to_regclass('public.ticket')
                 """.strip()
                 )
             )
             if result.scalar_one() is None:
                 raise RuntimeError(
-                    'Expected table "service_tickets" was not found after running migrations.'
+                    'Expected table "ticket" was not found after running migrations.'
                     " Verify alembic scripts are mounted correctly and migration history is valid."
                 )
     finally:
@@ -103,5 +103,5 @@ async def run_startup_migrations() -> None:
         async with _advisory_migration_lock():
             async with asyncio.TaskGroup() as tg:
                 tg.create_task(asyncio.to_thread(_upgrade_to_head, config))
-            await _assert_service_tickets_table(settings.database_url())
-    logger.info("Validated runtime schema: service_tickets table is present.")
+            await _assert_ticket_table(settings.database_url())
+    logger.info("Validated runtime schema: ticket table is present.")

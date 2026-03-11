@@ -32,6 +32,8 @@ def _initialize_session_maker() -> None:
             bind=_engine,
             expire_on_commit=False,
             autoflush=False,
+            autocommit=False,
+            future=True,
         )
 
 

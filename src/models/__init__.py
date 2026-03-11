@@ -1,5 +1,25 @@
 """Data model package."""
 
-from .service_ticket_model import ServiceCategory, ServiceTicketModel, ServiceUrgency
+from __future__ import annotations
 
-__all__ = ["ServiceCategory", "ServiceTicketModel", "ServiceUrgency"]
+from .embedding import TicketEmbeddingModel
+from .kb_chunk import KBChunkModel
+from .ticket import (
+    AIConfidence,
+    ServiceCategory,
+    ServicePriority,
+    ServiceStatus,
+    TicketModel,
+    UserRole,
+)
+
+__all__ = [
+    "AIConfidence",
+    "ServiceCategory",
+    "ServicePriority",
+    "ServiceStatus",
+    "TicketEmbeddingModel",
+    "KBChunkModel",
+    "TicketModel",
+    "UserRole",
+]

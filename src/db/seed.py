@@ -1,98 +1,80 @@
-"""Seed the service_tickets table from MOCK_DATA.json."""
+"""Startup seed helpers for tickets and KB docs."""
 
 from __future__ import annotations
 
-import argparse
-import asyncio
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, TypeAlias
 
 from loguru import logger
 
-from src.schemas.service_ticket import ServiceTicketCreate
-from src.services.service_ticket_service import SeedSummary, ServiceTicketService
+from src.dependencies import get_ticket_service
+from src.schemas import TicketCreateSchema
+from src.services import TicketSeedResult
 
-MOCK_DATA_PATH = Path(__file__).resolve().parents[2] / "data" / "MOCK_DATA.json"
-
-AllowedPayload: TypeAlias = dict[str, Any]
-
-
-@dataclass(frozen=True)
-class SeedResult:
-    """Seed execution summary."""
-
-    summary: SeedSummary
-    payloads_processed: int
+MOCK_DATA_PATH = Path(__file__).resolve().parents[2] / "data/MOCK_DATA.json"
 
 
-async def load_payloads(mock_data_path: Path) -> list[ServiceTicketCreate]:
-    """Load service tickets from mock file and ignore DB-owned identifiers."""
-    logger.info("Loading mock payloads from: {}", mock_data_path.as_posix())
-    raw_json = mock_data_path.read_text(encoding="utf-8")
-    payloads: list[AllowedPayload] = json.loads(raw_json)
+@dataclass(slots=True)
+class KBDoc:
+    """Static KB document used for demo retrieval."""
 
-    if not isinstance(payloads, list):
-        raise ValueError(f"Expected a JSON list in {mock_data_path.as_posix()}")
-
-    records: list[ServiceTicketCreate] = []
-    for raw_payload in payloads:
-        if not isinstance(raw_payload, dict):
-            raise TypeError(f"Expected object entries in {mock_data_path.as_posix()}")
-
-        normalized: AllowedPayload = {
-            key: value
-            for key, value in raw_payload.items()
-            if key in ServiceTicketCreate.model_fields
-        }
-        if "id" in raw_payload:
-            logger.debug("Ignoring id from mock payload: {}", raw_payload.get("id"))
-
-        records.append(ServiceTicketCreate.model_validate(normalized))
-
-    return records
+    source_name: str
+    chunk_text: str
+    metadata: dict[str, str]
 
 
-async def run_seed(mock_data_path: Path) -> SeedResult:
-    """Run idempotent seed/upsert against PostgreSQL."""
-    payloads = await load_payloads(mock_data_path)
-    summary = await ServiceTicketService().seed_tickets(payloads)
-    return SeedResult(summary=summary, payloads_processed=len(payloads))
+KB_DOCS: list[KBDoc] = [
+    KBDoc(
+        source_name="password_reset_policy",
+        chunk_text="If a student resets their password, access to Canvas and email may take up to 15 minutes to sync. Ask the student to wait 15 minutes, clear browser cache, and try again.",
+        metadata={"category": "authentication"},
+    ),
+    KBDoc(
+        source_name="wifi_troubleshooting",
+        chunk_text="For campus Wi-Fi issues, confirm the user is on the correct SSID, forget the network, reconnect, and re-enter credentials. If still failing, check whether the account is locked.",
+        metadata={"category": "network"},
+    ),
+    KBDoc(
+        source_name="printer_setup_library",
+        chunk_text="Library printers require the school print client. Install the printer package, restart the device, and ensure the user is on campus network or VPN.",
+        metadata={"category": "printing"},
+    ),
+    KBDoc(
+        source_name="mfa_enrollment",
+        chunk_text="If MFA setup fails, confirm device time is synced, remove stale authenticator entries, and retry enrollment from the student portal.",
+        metadata={"category": "authentication"},
+    ),
+]
 
 
-async def main() -> int:
-    """CLI entrypoint for seed script."""
-    parser = argparse.ArgumentParser(description="Seed service_tickets from JSON.")
-    parser.add_argument(
-        "--path",
-        default=str(MOCK_DATA_PATH),
-        help="Path to the mock data json payload.",
+def load_mock_tickets(path: Path = MOCK_DATA_PATH) -> list[TicketCreateSchema]:
+    """Load canonical ticket seed data from disk."""
+    logger.info("Loading mock data from {}", path.as_posix())
+    if not path.exists():
+        raise RuntimeError(f"Mock data file not found: {path.as_posix()}")
+
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    return [TicketCreateSchema.model_validate(ticket) for ticket in raw]
+
+
+async def run_seed(path: Path = MOCK_DATA_PATH) -> TicketSeedResult:
+    """Seed tickets and KB docs through the async service layer."""
+    service = get_ticket_service()
+    ticket_payloads = load_mock_tickets(path)
+    summary = await service.seed_tickets(ticket_payloads)
+    kb_chunks_upserted = await service.seed_kb_docs(
+        [
+            {
+                "source_name": doc.source_name,
+                "chunk_text": doc.chunk_text,
+                "metadata": doc.metadata,
+            }
+            for doc in KB_DOCS
+        ]
     )
-    parser.add_argument(
-        "--path-only",
-        action="store_true",
-        help="Validate payload path only; no DB write.",
+    return TicketSeedResult(
+        summary=summary,
+        payloads_processed=len(ticket_payloads),
+        kb_chunks_upserted=kb_chunks_upserted,
     )
-    args = parser.parse_args()
-
-    data_path = Path(args.path)
-    payloads = await load_payloads(data_path)
-    if args.path_only:
-        print(f"{len(payloads)} ticket payload(s) parsed from {data_path}")
-        return 0
-
-    summary = await ServiceTicketService().seed_tickets(payloads)
-    result = SeedResult(summary=summary, payloads_processed=len(payloads))
-    print(
-        "Seed complete: "
-        f"{result.summary.created} created, "
-        f"{result.summary.updated} updated, "
-        f"{result.summary.skipped} skipped "
-        f"from {result.payloads_processed} payload(s)"
-    )
-    return 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(asyncio.run(main()))
