@@ -8,6 +8,8 @@ COLUMN_DEFAULTS: Final[dict[str, str]] = {
     "align": "left",
     "headerClasses": "uppercase text-primary",
 }
+
+
 COLUMNS: Final[list[dict[str, str | bool]]] = [
     {
         "name": "id",
@@ -18,12 +20,11 @@ COLUMNS: Final[list[dict[str, str | bool]]] = [
         "align": "center",
     },
     {
-        "name": "urgency",
-        "label": "Urgency",
-        "field": "urgency",
+        "name": "title",
+        "label": "Title",
+        "field": "title",
         "required": True,
         "sortable": True,
-        "align": "center",
     },
     {
         "name": "category",
@@ -34,34 +35,44 @@ COLUMNS: Final[list[dict[str, str | bool]]] = [
         "align": "center",
     },
     {
-        "name": "description",
-        "label": "Description",
-        "field": "description",
-        "required": True,
-        "sortable": False,
-    },
-    {
-        "name": "first_occurrence",
-        "label": "Date Occurred",
-        "field": "first_occurrence",
+        "name": "status",
+        "label": "Status",
+        "field": "status",
         "required": True,
         "sortable": True,
         "align": "center",
     },
     {
-        "name": "received_error_message",
-        "label": "Has Error Message",
-        "field": "received_error_message",
+        "name": "priority",
+        "label": "Priority",
+        "field": "priority",
         "required": True,
         "sortable": True,
         "align": "center",
     },
     {
-        "name": "error_message_details",
-        "label": "Error Details",
-        "field": "error_message_details",
-        "required": False,
-        "sortable": False,
+        "name": "requestor_name",
+        "label": "Requestor Name",
+        "field": "requestor_name",
+        "required": True,
+        "sortable": True,
+        "align": "center",
+    },
+    {
+        "name": "requestor_email",
+        "label": "Requestor Email",
+        "field": "requestor_email",
+        "required": True,
+        "sortable": True,
+        "align": "center",
+    },
+    {
+        "name": "user_role",
+        "label": "User Type",
+        "field": "user_role",
+        "required": True,
+        "sortable": True,
+        "align": "center",
     },
     {
         "name": "created_at",
@@ -80,13 +91,9 @@ COLUMNS: Final[list[dict[str, str | bool]]] = [
         "align": "center",
     },
     {
-        "name": "assignee",
-        "label": "Assignee",
-        "field": "assignee",
-        "required": True,
-        "sortable": True,
+        "name": "start",
+        "label": "Start",
         "align": "center",
     },
-    {"name": "delete", "label": "Delete", "align": "center"},
     {"name": "close", "label": "Close", "align": "center"},
 ]

@@ -1,0 +1,148 @@
+"""Table Utils"""
+
+from __future__ import annotations
+
+from nicegui import ui
+from nicegui.elements.table import Table
+
+
+def add_expandable_row(table: Table) -> None:
+    """Make the table expandable
+
+    Args:
+        table (Table): The table instance to make expandable
+    """
+    table.add_slot(
+        "header",
+        r"""
+            <q-tr :props="props">
+                <q-th auto-width />
+                <q-th v-for="col in props.cols" :key="col.name" :props="props">
+                    {{ col.label }}
+                </q-th>
+            </q-tr>
+        """,
+    )
+
+    table.add_slot(
+        "body",
+        r"""
+            <q-tr :props="props">
+                <q-td auto-width>
+                    <q-btn size="sm" color="accent" round dense
+                        @click="props.expand = !props.expand"
+                        :icon="props.expand ? 'remove' : 'add'" />
+                </q-td>
+                <q-td v-for="col in props.cols" :key="col.name" :props="props">
+                    {{ col.value }}
+                </q-td>
+            </q-tr>
+            <q-tr v-show="props.expand" :props="props">
+                <q-td auto-width>
+                    <div class="text-left">
+                    {{ props.row.description }}
+                    </div>
+                </q-td>
+                <q-td auto-width>
+                    <div class="q-pa-md row items-start q-gutter-md">
+                        <q-card class="my-card" flat bordered>
+                            <q-item>
+                                <q-item-section>
+                                    <q-item-label>Detailed Overview</q-item-label>
+                                    <q-item-label caption>
+                                        Detailed overview of the ticket
+                                    </q-item-label>
+                                </q-item-section>
+                            </q-item>
+                            <q-separator />
+                            <q-card-section horizontal>
+                                <q-card-section>
+                                    <div class="text-subtitle2">Original Ticket</div>
+                                    <div>{{ props.row.description }}</div>
+                                </q-card-section>
+                                <q-separator vertical />
+                                <q-card-section>
+                                    <q-item>
+                                        <q-item-section>
+                                            <q-item-label>AI Summary</q-item-label>
+                                            <q-item-label caption>{{props.row.ai_summary}}</q-item-label>
+                                        </q-item-section>  
+                                    </q-item>
+                                    <q-separator spaced inset />
+                                    <q-item>
+                                        <q-item-section>
+                                            <q-item-label>AI Response</q-item-label>
+                                            <q-item-label caption >{{props.row.ai_response }}</q-item-label>
+                                        </q-item-section>  
+                                     </q-item>
+                                    <q-separator spaced inset />
+                                    <q-item>
+                                        <q-item-section>
+                                            <q-item-label>AI Confidence</q-item-label>
+                                            <q-item-label caption >{{props.row.ai_confidence }}</q-item-label>
+                                        </q-item-section>  
+                                     </q-item>
+                                    <q-separator spaced inset />
+                                    <q-item>
+                                        <q-item-section>
+                                            <q-item-label>AI Category</q-item-label>
+                                            <q-item-label caption >{{props.row.category }}</q-item-label>
+                                        </q-item-section>  
+                                    </q-item>
+                                    <q-separator spaced inset />
+                                    <q-item>
+                                        <q-item-section>
+                                            <q-item-label>AI Next Steps</q-item-label>
+                                            <q-list bordered separator>
+                                                <q-item v-for="step in props.row.ai_next_steps" :props="props" :key="step" clickable v-ripple>
+                                                    {{step}}
+                                                </q-item>
+                                            </q-list>
+                                        </q-item-section>  
+                                    </q-item>
+                                    <q-separator spaced inset />
+                                    <q-item>
+                                        <q-item-section>
+                                            <q-item-label>Retrieved Context</q-item-label>
+                                            <div v-if="props.row.ai_trace">
+                                                <div class="text-caption text-weight-medium q-mt-sm">Knowledge Base Matches</div>
+                                                <q-list dense bordered separator>
+                                                    <q-item v-for="match in props.row.ai_trace.kb_matches" :key="'kb-' + match.id">
+                                                        <q-item-section>
+                                                            <q-item-label>{{ match.source_name }} ({{ Number(match.similarity).toFixed(3) }})</q-item-label>
+                                                            <q-item-label caption>{{ match.chunk_text }}</q-item-label>
+                                                        </q-item-section>
+                                                    </q-item>
+                                                </q-list>
+                                                <div class="text-caption text-weight-medium q-mt-md">Similar Tickets</div>
+                                                <q-list dense bordered separator>
+                                                    <q-item v-for="match in props.row.ai_trace.ticket_matches" :key="'ticket-' + match.ticket_id">
+                                                        <q-item-section>
+                                                            <q-item-label>#{{ match.ticket_id }} {{ match.title }} ({{ Number(match.similarity).toFixed(3) }})</q-item-label>
+                                                            <q-item-label caption>{{ match.combined_text }}</q-item-label>
+                                                        </q-item-section>
+                                                    </q-item>
+                                                </q-list>
+                                            </div>
+                                            <q-item-label v-else caption>No AI trace available for this ticket yet.</q-item-label>
+                                        </q-item-section>
+                                    </q-item>
+                                </q-card-section>
+                            </q-card-section>
+                        </q-card>
+                    </div>
+                </q-td>
+            </q-tr>
+        """,
+    )
+
+
+def add_search(table: Table) -> None:
+    """Add Search to the table
+
+    Args:
+        table (Table): The table instance to add search to
+    """
+    with table.add_slot("top-right"):
+        with ui.input(placeholder="Search").props("type=search").bind_value(table, "filter").add_slot("append"):
+            ui.icon("search")
