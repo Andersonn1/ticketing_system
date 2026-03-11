@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import unittest
 
-from src.pages.ai_page import _selected_ticket_ids, _triage_result_notification
+from src.pages.ai_service_page import _selected_ticket_ids, _triage_result_notification
 from src.services import TriageBatchResult
 
 

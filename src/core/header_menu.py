@@ -18,6 +18,7 @@ def header_menu() -> None:
     """),
     )
     ui.link("Home", "/").classes(replace="text-white").classes("font-bold")
+    ui.link("Submit Ticket", "/request").classes(replace="text-white").classes("font-bold")
     ui.link("Manual Process", "/manual").classes(replace="text-white").classes("font-bold")
     ui.link("AI Process", "/ai-process").classes(replace="text-white").classes("font-bold")
     with ui.element().classes("max-[420px]:hidden").tooltip("Cycle theme mode through dark, light, and system/auto."):

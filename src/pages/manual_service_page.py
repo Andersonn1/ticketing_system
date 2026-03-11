@@ -1,4 +1,4 @@
-"""Manual Driven Ticket System Page"""
+"""Manual Service Page"""
 
 from __future__ import annotations
 

@@ -12,7 +12,7 @@ from src.dependencies import get_settings
 from src.db.migrations import run_startup_migrations
 from src.db.seed import MOCK_DATA_PATH, run_seed
 from src.db.session import close_db_connection
-from src.pages import ai_page, home_page, manual_page
+from src.pages import ai_service_page, home_page, manual_request_page, manual_service_page
 
 settings = get_settings()
 
@@ -69,8 +69,9 @@ async def _post_dark_mode(request: Request) -> None:
 
 
 home_page.register()
-manual_page.register()
-ai_page.register()
+manual_request_page.register()
+manual_service_page.register()
+ai_service_page.register()
 
 
 @app.get("/status")

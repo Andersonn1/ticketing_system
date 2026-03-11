@@ -5,7 +5,7 @@ from __future__ import annotations
 import unittest
 
 from src import dependencies
-from src.pages import ai_page, manual_page
+from src.pages import ai_service_page, manual_request_page, manual_service_page
 from src.services import TicketService
 
 
@@ -31,8 +31,9 @@ class DependencyProviderTests(unittest.TestCase):
             dependencies.get_ollama_client = original_get_ollama_client
 
     def test_page_registration_still_supports_dependency_injection(self) -> None:
-        manual_page.register()
-        ai_page.register()
+        manual_request_page.register()
+        manual_service_page.register()
+        ai_service_page.register()
 
 
 if __name__ == "__main__":

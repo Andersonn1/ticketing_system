@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from pydantic import Field, field_serializer
+from pydantic import EmailStr, Field, field_serializer, field_validator
 
 from src.models import (
     AIConfidence,
@@ -20,10 +20,45 @@ class TicketCreateSchema(BaseSchema):
     """Payload required to create a ticket."""
 
     requestor_name: str = Field(..., description="The name of the person who made the request")
-    requestor_email: str = Field(..., description="The email of the person who made the request")
+    requestor_email: EmailStr = Field(..., description="The email of the person who made the request")
     user_role: UserRole = Field(..., description="The role of the person who made the request")
     title: str = Field(..., description="The title assigned to the ticket")
     description: str = Field(..., description="A brief description of the issue")
+
+    @field_validator("requestor_name", "requestor_email", "title", "description", mode="before")
+    @classmethod
+    def strip_text_fields(cls, value: object) -> object:
+        """Trim user-entered string fields before validating them."""
+        if isinstance(value, str):
+            return value.strip()
+        return value
+
+    @field_validator("requestor_name")
+    @classmethod
+    def validate_requestor_name(cls, value: str) -> str:
+        if not value:
+            raise ValueError("Enter your name.")
+        if not 2 <= len(value) <= 250:
+            raise ValueError("Name must be between 2 and 250 characters.")
+        return value
+
+    @field_validator("title")
+    @classmethod
+    def validate_title(cls, value: str) -> str:
+        if not value:
+            raise ValueError("Enter a ticket title.")
+        if not 8 <= len(value) <= 125:
+            raise ValueError("Title must be between 8 and 125 characters.")
+        return value
+
+    @field_validator("description")
+    @classmethod
+    def validate_description(cls, value: str) -> str:
+        if not value:
+            raise ValueError("Enter a description of the issue.")
+        if not 20 <= len(value) <= 4000:
+            raise ValueError("Description must be between 20 and 4000 characters.")
+        return value
 
 
 class TriageResultSchema(BaseSchema):
@@ -73,7 +108,7 @@ class TicketResponseSchema(BaseSchema):
 
     id: int = Field(..., description="The unique identifier of the ticket")
     requestor_name: str = Field(..., description="The name of the person who made the request")
-    requestor_email: str = Field(..., description="The email of the person who made the request")
+    requestor_email: EmailStr = Field(..., description="The email of the person who made the request")
     user_role: UserRole = Field(..., description="The role of the person who made the request")
     title: str = Field(..., description="The title assigned to the ticket")
     description: str = Field(..., description="A brief description of the issue")

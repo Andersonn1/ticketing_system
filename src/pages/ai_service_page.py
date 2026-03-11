@@ -1,4 +1,4 @@
-"""AI Driven Ticket System Page"""
+"""AI Driven Service Page"""
 
 from __future__ import annotations
 
