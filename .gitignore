@@ -12,3 +12,5 @@ wheels/
 notes.md
 logs/
 pgadmin/pgpass
+pgadmin.env
+postgres.env
