@@ -91,8 +91,8 @@ def ticket_table(title: str, data: list[TicketResponseSchema], service: TicketSe
                 color="positive",
             )
 
-        add_search(table=table)
-        add_expandable_row(table=table)
+        table = add_search(table=table)
+        table = add_expandable_row(table=table)
         with table.add_slot("body-cell-priority"):
             with table.cell("priority"):
                 ui.badge().props("""

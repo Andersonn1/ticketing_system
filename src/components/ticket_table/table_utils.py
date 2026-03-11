@@ -6,7 +6,7 @@ from nicegui import ui
 from nicegui.elements.table import Table
 
 
-def add_expandable_row(table: Table) -> None:
+def add_expandable_row(table: Table) -> Table:
     """Make the table expandable
 
     Args:
@@ -16,6 +16,9 @@ def add_expandable_row(table: Table) -> None:
         "header",
         r"""
             <q-tr :props="props">
+                <q-th auto-width v-if="props.selected !== void 0">
+                    <q-checkbox v-model="props.selected" dense />
+                </q-th>
                 <q-th auto-width />
                 <q-th v-for="col in props.cols" :key="col.name" :props="props">
                     {{ col.label }}
@@ -28,22 +31,27 @@ def add_expandable_row(table: Table) -> None:
         "body",
         r"""
             <q-tr :props="props">
+                <q-td auto-width v-if="props.selected !== void 0">
+                    <q-checkbox v-model="props.selected" dense />
+                </q-td>
                 <q-td auto-width>
                     <q-btn size="sm" color="accent" round dense
                         @click="props.expand = !props.expand"
                         :icon="props.expand ? 'remove' : 'add'" />
                 </q-td>
-                <q-td v-for="col in props.cols" :key="col.name" :props="props">
-                    {{ col.value }}
-                </q-td>
+                <template v-for="col in props.cols" :key="col.name">
+                    <slot
+                        :name="'body-cell-' + col.name"
+                        v-bind="{ props: { ...props, col: col, value: col.value } }"
+                    >
+                        <q-td :props="props" :key="col.name">
+                            {{ col.value }}
+                        </q-td>
+                    </slot>
+                </template>
             </q-tr>
             <q-tr v-show="props.expand" :props="props">
-                <q-td auto-width>
-                    <div class="text-left">
-                    {{ props.row.description }}
-                    </div>
-                </q-td>
-                <q-td auto-width>
+                <q-td colspan="100%">
                     <div class="q-pa-md row items-start q-gutter-md">
                         <q-card class="my-card" flat bordered>
                             <q-item>
@@ -56,14 +64,14 @@ def add_expandable_row(table: Table) -> None:
                             </q-item>
                             <q-separator />
                             <q-card-section horizontal>
-                                <q-card-section>
+                                <q-card-section auto-width>
                                     <div class="text-subtitle2">Original Ticket</div>
                                     <div>{{ props.row.description }}</div>
                                 </q-card-section>
                                 <q-separator vertical />
                                 <q-card-section>
                                     <q-item>
-                                        <q-item-section>
+                                        <q-item-section auto-width>
                                             <q-item-label>AI Summary</q-item-label>
                                             <q-item-label caption>{{props.row.ai_summary}}</q-item-label>
                                         </q-item-section>  
@@ -136,13 +144,18 @@ def add_expandable_row(table: Table) -> None:
         """,
     )
 
+    return table
 
-def add_search(table: Table) -> None:
+
+def add_search(table: Table) -> Table:
     """Add Search to the table
 
     Args:
         table (Table): The table instance to add search to
+
+    Returns: Table
     """
     with table.add_slot("top-right"):
         with ui.input(placeholder="Search").props("type=search").bind_value(table, "filter").add_slot("append"):
             ui.icon("search")
+    return table
