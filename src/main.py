@@ -8,7 +8,7 @@ from nicegui import app, ui
 from starlette.middleware.sessions import SessionMiddleware
 
 from src.core.logging import configure_logging
-from src.core.settings import get_settings
+from src.dependencies import get_settings
 from src.db.migrations import run_startup_migrations
 from src.db.seed import MOCK_DATA_PATH, run_seed
 from src.db.session import close_db_connection
@@ -21,9 +21,9 @@ settings = get_settings()
 async def _run_startup_tasks() -> None:
     """Run migrations, then seed data, and fail fast on errors."""
     configure_logging()
-    logger.info("Running database migrations.")
 
     try:
+        logger.info("Running database migrations.")
         await run_startup_migrations()
     except Exception as exc:
         logger.exception("Startup migration failed: {}", exc)
@@ -37,11 +37,17 @@ async def _run_startup_tasks() -> None:
         logger.exception("Startup seed failed: {}", exc)
         raise
     logger.success(
-        "Seed complete: {} created, {} updated, {} skipped, {} payload(s) processed.",
+        """Seed complete:
+         {} created,
+           {} updated,
+             {} skipped,
+               {} payload(s) processed,
+                 {} KB chunk(s) upserted.""",
         result.summary.created,
         result.summary.updated,
         result.summary.skipped,
         result.payloads_processed,
+        result.kb_chunks_upserted,
     )
 
 
@@ -53,9 +59,7 @@ async def _close_db() -> None:
 app.on_startup(_run_startup_tasks)
 app.on_shutdown(_close_db)
 
-app.add_middleware(
-    SessionMiddleware, secret_key=settings.session_key.get_secret_value()
-)
+app.add_middleware(SessionMiddleware, secret_key=settings.session_key.get_secret_value())
 
 
 # Register Pages

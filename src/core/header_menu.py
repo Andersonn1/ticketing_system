@@ -18,25 +18,15 @@ def header_menu() -> None:
     """),
     )
     ui.link("Home", "/").classes(replace="text-white").classes("font-bold")
-    ui.link("Manual Process", "/manual").classes(replace="text-white").classes(
-        "font-bold"
-    )
-    ui.link("AI Process", "/ai-process").classes(replace="text-white").classes(
-        "font-bold"
-    )
-    with (
-        ui.element()
-        .classes("max-[420px]:hidden")
-        .tooltip("Cycle theme mode through dark, light, and system/auto.")
-    ):
+    ui.link("Manual Process", "/manual").classes(replace="text-white").classes("font-bold")
+    ui.link("AI Process", "/ai-process").classes(replace="text-white").classes("font-bold")
+    with ui.element().classes("max-[420px]:hidden").tooltip("Cycle theme mode through dark, light, and system/auto."):
         ui.button(icon="dark_mode", on_click=lambda: dark_mode.set_value(None)).props(
             "flat fab-mini color=white"
         ).bind_visibility_from(dark_mode, "value", value=True)
         ui.button(icon="light_mode", on_click=lambda: dark_mode.set_value(True)).props(
             "flat fab-mini color=white"
         ).bind_visibility_from(dark_mode, "value", value=False)
-        ui.button(
-            icon="brightness_auto", on_click=lambda: dark_mode.set_value(False)
-        ).props("flat fab-mini color=white").bind_visibility_from(
-            dark_mode, "value", lambda mode: mode is None
-        )
+        ui.button(icon="brightness_auto", on_click=lambda: dark_mode.set_value(False)).props(
+            "flat fab-mini color=white"
+        ).bind_visibility_from(dark_mode, "value", lambda mode: mode is None)

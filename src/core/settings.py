@@ -5,12 +5,10 @@ from __future__ import annotations
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import Field, PostgresDsn, SecretStr
+from pydantic import AliasChoices, Field, PostgresDsn, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-VALID_LOG_LEVEL_NAMES = Literal[
-    "CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG", "NOTSET"
-]
+VALID_LOG_LEVEL_NAMES = Literal["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG", "NOTSET"]
 VALID_LOG_LEVEL_INTS = Literal[50, 40, 30, 20, 10, 0]
 
 
@@ -25,9 +23,7 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    app_name: str = Field(
-        default="IT Support Demo", description="The name of the demo application"
-    )
+    app_name: str = Field(default="IT Support Demo", description="The name of the demo application")
     app_env: Literal["develop", "staging", "production"] = Field(
         default="develop", description="The environments the app is running in"
     )
@@ -38,26 +34,29 @@ class Settings(BaseSettings):
     log_level: VALID_LOG_LEVEL_NAMES | VALID_LOG_LEVEL_INTS = Field(
         default="DEBUG", description="Application logging level"
     )
-    log_file: str = Field(
-        default="logs/app.log", description="Application log file path"
+    log_file: str = Field(default="logs/app.log", description="Application log file path")
+    log_file_rotation: str = Field(default="3 days", description="Application log file retention period")
+    chat_model: str = Field(..., description="The AI model that will be used")
+    embedding_model: str = Field(
+        ...,
+        description="The embedding model that will be used",
+        validation_alias=AliasChoices("EMBEDDING_MODEL", "EMBED_MODEL"),
     )
-    log_file_rotation: str = Field(
-        default="3 days", description="Application log file retention period"
+    model_provider: str = Field(default="ollama", description="The AI model provider")
+    ollama_base_url: str = Field(
+        default="http://localhost:11434",
+        description="The Ollama base URL",
+        validation_alias=AliasChoices("OLLAMA_BASE_URL", "MODEL_PROVIDER_URL"),
     )
-    model: str = Field(..., description="The AI model that will be used")
-    model_provider: str = Field(default=..., description="The AI model provider")
-    model_provider_url: str = Field(
-        default=..., description="The AI model provider's api endpoint"
-    )
-    model_provider_api_key: SecretStr = Field(
-        default=SecretStr("Please provide a valid API key"),
+    model_provider_api_key: SecretStr | None = Field(
+        default=None,
         description="The API key to use to auth with the AI provider",
     )
     db_name: str = Field(..., description="The postgres database name")
     db_user: str = Field(..., description="The postgres database user")
     db_host: str = Field(default="localhost", description="The postgres host")
     db_password: SecretStr = Field(..., description="The postgres database password")
-    db_port: int = Field(..., description="The postgres database port")
+    db_port: int = Field(default=5432, description="The postgres database port")
 
     def database_url(self) -> str:
         """Build the async SQLAlchemy connection URL for PostgreSQL."""

@@ -7,14 +7,13 @@ from contextlib import contextmanager
 from nicegui import ui
 
 from src.core.header_menu import header_menu
-from src.core.settings import get_settings
-
-settings = get_settings()
+from src.dependencies import get_settings
 
 
 @contextmanager
 def frame(navigation_title: str):
     """Custom page frame to share the same styling and behavior across all pages"""
+    settings = get_settings()
     ui.colors(
         primary="#1976d2",
         primary_light="#42a5f5",

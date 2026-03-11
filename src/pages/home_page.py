@@ -8,6 +8,8 @@ from src.core.theme import frame
 
 
 def register() -> None:
+    """Register the Home page"""
+
     @ui.page("/")
     def home_page():
         with frame("Welcome to IT Support System"):

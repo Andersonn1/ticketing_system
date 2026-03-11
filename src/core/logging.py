@@ -7,9 +7,7 @@ from pathlib import Path
 
 from loguru import logger
 
-from src.core.settings import get_settings
-
-settings = get_settings()
+from src.dependencies import get_settings
 
 LOG_FORMAT = (
     "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
@@ -23,6 +21,7 @@ _FALLBACK_LOG_FILE = Path("logs") / "app.log"
 
 def configure_logging() -> None:
     """Configure Application Logging"""
+    settings = get_settings()
 
     logger.remove()
 
