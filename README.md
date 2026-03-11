@@ -122,6 +122,7 @@ category, priority, summary, response, next_steps, confidence
 - [Loguru](https://loguru.readthedocs.io/) for structured application logging
 - [Just](https://just.systems/man/en/) for command shortcuts
 - [Ollama](https://docs.ollama.com/) for local LLm hosting
+- [pgvector](https://github.com/pgvector/pgvector) for PostgreSQL vector search
 
 ### Dependency Injection Convention
 
@@ -236,6 +237,8 @@ uv run python -m src.main
 ```
 
 #### With Docker (recommended)
+
+The compose stack uses a PostgreSQL image with the `pgvector` extension preinstalled because the app migration creates `vector` columns and IVFFlat indexes during startup.
 
 ```bash
 just build

@@ -18,8 +18,29 @@ class Vector(UserDefinedType):
 
     def bind_processor(self, dialect):
         del dialect
-        return None
+        
+        def process(value: list[float] | tuple[float, ...] | str | None) -> str | None:
+            if value is None:
+                return None
+            if isinstance(value, str):
+                return value
+            return "[" + ",".join(f"{float(item):.8f}" for item in value) + "]"
+
+        return process
 
     def result_processor(self, dialect, coltype):
         del dialect, coltype
-        return None
+
+        def process(value: str | None) -> list[float] | None:
+            if value is None:
+                return None
+            normalized = value.strip()
+            if not normalized:
+                return []
+            if normalized[0] == "[" and normalized[-1] == "]":
+                normalized = normalized[1:-1]
+            if not normalized:
+                return []
+            return [float(item) for item in normalized.split(",")]
+
+        return process

@@ -50,7 +50,7 @@ setup-dev:
 [group("Application Migrations")]
 [doc("Create a new database migration")]
 migration-new message="auto migration":
-    docker exec -it ticketing-system-app uv run alembic revision --autogenerate -m "{{message}}"
+    docker exec -it app uv run alembic revision --autogenerate -m "{{message}}"
 
 [group("Code Quality")]
 [doc("Lint the API code")]

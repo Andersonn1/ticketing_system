@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: ticketing-system-app
+    container_name: app
     depends_on:
       postgres:
         condition: service_healthy
@@ -18,17 +18,19 @@ services:
     restart: unless-stopped
     networks:
       - service_desk
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   postgres:
-    image: postgres:16-alpine
-    container_name: ticketing-system-postgres
+    image: pgvector/pgvector:pg16
+    container_name: postgres
     env_file: ./postgres.env
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ticketing_user -d ticketing_system"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
       timeout: 5s
       retries: 20
@@ -38,7 +40,7 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4:8
-    container_name: ticketing-system-pgadmin
+    container_name: pgadmin
     env_file:
       - ./pgadmin.env
     depends_on:
