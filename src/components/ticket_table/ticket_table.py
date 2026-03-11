@@ -5,6 +5,7 @@ from __future__ import annotations
 from enum import StrEnum
 from typing import Any
 
+from loguru import logger
 from nicegui import ui
 from nicegui.elements.table import Table
 
@@ -21,12 +22,54 @@ from src.services import TicketService
 from .table_config import COLUMN_DEFAULTS, COLUMNS
 from .table_utils import add_expandable_row, add_search
 
+_ACTION_LABELS = {
+    "start": "Start",
+    "close": "Close",
+}
+
+_BADGE_COLORS = {
+    "priority": {
+        "High": "red",
+        "Medium": "orange",
+        "Low": "yellow",
+    },
+    "status": {
+        "Open": "green",
+        "Pending": "orange",
+        "Closed": "red",
+    },
+}
+
 
 def _coerce_enum[TEnum: StrEnum](enum_cls: type[TEnum], value: TEnum | str) -> TEnum:
     """Convert table JSON values back into the canonical enum values."""
     if isinstance(value, enum_cls):
         return value
     return enum_cls(str(value).strip().lower())
+
+
+def _badge_color(column_name: str, value: Any) -> str:
+    """Return the badge color for one rendered table value."""
+    return _BADGE_COLORS.get(column_name, {}).get(str(value), "grey-5")
+
+
+def _normalize_table_row(row: dict[str, Any]) -> dict[str, Any]:
+    """Add display-only fields required by the custom table slots."""
+    normalized_row = dict(row)
+    normalized_row.update(_ACTION_LABELS)
+    normalized_row["priority_color"] = _badge_color("priority", normalized_row.get("priority"))
+    normalized_row["status_color"] = _badge_color("status", normalized_row.get("status"))
+    return normalized_row
+
+
+def _serialize_table_row(ticket: TicketResponseSchema) -> dict[str, Any]:
+    """Serialize one ticket into a row consumable by the table slots."""
+    return _normalize_table_row(ticket.model_dump(mode="json"))
+
+
+def _serialize_table_rows(data: list[TicketResponseSchema]) -> list[dict[str, Any]]:
+    """Serialize ticket data into rows consumable by the table slots."""
+    return [_serialize_table_row(ticket) for ticket in data]
 
 
 def _build_update_payload(row: dict[str, Any], status: ServiceStatus) -> TicketUpdateSchema:
@@ -46,7 +89,7 @@ def _build_update_payload(row: dict[str, Any], status: ServiceStatus) -> TicketU
 
 def _sync_table_row(table: Table, updated_ticket: TicketResponseSchema) -> None:
     """Replace one row in the UI with the latest service response."""
-    updated_row = updated_ticket.model_dump(mode="json")
+    updated_row = _serialize_table_row(updated_ticket)
     ticket_id = updated_row["id"]
     table.update_rows(
         [updated_row if row["id"] == ticket_id else row for row in table.rows],
@@ -62,7 +105,7 @@ def ticket_table(title: str, data: list[TicketResponseSchema], service: TicketSe
     Args:
         data (list[TicketResponseSchema]): Data that will be populated in the table
     """
-    rows: list[dict[str, Any]] = [x.model_dump(mode="json") for x in data]
+    rows = _serialize_table_rows(data)
     with ui.table(
         title=title,
         columns=COLUMNS,
@@ -77,15 +120,24 @@ def ticket_table(title: str, data: list[TicketResponseSchema], service: TicketSe
             ticket_id = int(row["id"])
             current_status = _coerce_enum(ServiceStatus, row["status"])
             if current_status == status:
+                logger.info("Ignoring ticket status update for ticket {} because it is already {}.", ticket_id, status)
                 ui.notify(f"Ticket {ticket_id} is already {status.value.title()}.", color="warning")
                 return
 
+            logger.info(
+                "Updating ticket {} status from {} to {} from the table UI.",
+                ticket_id,
+                current_status,
+                status,
+            )
             updated_ticket = await service.update_ticket(ticket_id, _build_update_payload(row, status))
             if updated_ticket is None:
+                logger.warning("Unable to update ticket {} because it was not found.", ticket_id)
                 ui.notify(f"Ticket {ticket_id} was not found.", color="negative")
                 return
 
             _sync_table_row(table, updated_ticket)
+            logger.info("Ticket {} status updated to {}.", ticket_id, updated_ticket.status)
             ui.notify(
                 f"Ticket {ticket_id} moved to {updated_ticket.status.value.title()}.",
                 color="positive",
@@ -93,30 +145,6 @@ def ticket_table(title: str, data: list[TicketResponseSchema], service: TicketSe
 
         table = add_search(table=table)
         table = add_expandable_row(table=table)
-        with table.add_slot("body-cell-priority"):
-            with table.cell("priority"):
-                ui.badge().props("""
-                        :color="props.value == 'High' ? 'red' : props.value == 'Medium' ? 'orange' : 'yellow'"
-                        :label="props.value"
-                    """)
-        with table.add_slot("body-cell-status"):
-            with table.cell("status"):
-                ui.badge().props("""
-                        :color="props.value == 'Open' ? 'green' : props.value == 'Pending' ? 'orange' : 'red'"
-                        :label="props.value"
-                    """)
-        with table.add_slot("body-cell-start"):
-            with table.cell("start"):
-                ui.button("Start").props("flat").on(
-                    "click",
-                    handler=lambda e: set_ticket_status(e.args, ServiceStatus.PENDING),
-                    js_handler="() => emit(props.row)",
-                )
-        with table.add_slot("body-cell-close"):
-            with table.cell("close"):
-                ui.button("Close").props("flat").on(
-                    "click",
-                    handler=lambda e: set_ticket_status(e.args, ServiceStatus.CLOSED),
-                    js_handler="() => emit(props.row)",
-                )
+        table.on("ticket-start", handler=lambda e: set_ticket_status(e.args, ServiceStatus.PENDING))
+        table.on("ticket-close", handler=lambda e: set_ticket_status(e.args, ServiceStatus.CLOSED))
     return table

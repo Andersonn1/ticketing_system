@@ -17,8 +17,9 @@ def register() -> None:
 
     @ui.page("/manual")
     async def manual_page(service: TicketService = Depends(get_ticket_service)):
-        data = await service.list_tickets()
         logger.info("Registering Manual Page")
+        data = await service.list_tickets()
+        logger.info("Manual page loaded {} tickets.", len(data))
         with frame("Manual Ticketing Example"):
             ticket_table(title="Manual Ticketing Service", data=data, service=service)
         logger.success("Successfully Registered Manual Page!")

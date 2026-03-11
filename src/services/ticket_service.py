@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import asyncio
+from time import perf_counter
 from typing import Any
+
+from loguru import logger
 
 from src.llm.triage import (
     KB_TOP_K,
@@ -45,45 +48,62 @@ class TicketService(TicketServiceContract):
 
     async def list_tickets(self) -> list[TicketResponseSchema]:
         """Return all tickets from the database."""
+        logger.debug("Listing tickets from the database.")
         async with self._session_provider() as session:
             repository = TicketRepository(session)
             rows = await repository.list_all()
-            return [self._to_schema(row) for row in rows]
+            response = [self._to_schema(row) for row in rows]
+            logger.info("Loaded {} tickets from the database.", len(response))
+            return response
 
     async def get_ticket(self, ticket_id: int) -> TicketResponseSchema | None:
         """Return a single ticket by PK."""
+        logger.debug("Loading ticket {} from the database.", ticket_id)
         async with self._session_provider() as session:
             repository = TicketRepository(session)
             row = await repository.get_by_id(ticket_id)
+            if row is None:
+                logger.warning("Ticket {} was not found.", ticket_id)
+            else:
+                logger.debug("Loaded ticket {}.", ticket_id)
             return self._to_schema(row) if row is not None else None
 
     async def create_ticket(self, payload: TicketCreateSchema) -> TicketResponseSchema:
         """Create one ticket and return it."""
+        logger.info("Creating ticket for {} with title '{}'.", payload.requestor_email, payload.title)
         async with self._session_provider() as session:
             repository = TicketRepository(session)
             row = await repository.create(payload)
             await session.commit()
             await session.refresh(row)
+            logger.info("Created ticket {}.", row.id)
             return self._to_schema(row)
 
     async def update_ticket(self, ticket_id: int, payload: TicketUpdateSchema) -> TicketResponseSchema | None:
         """Update a ticket by ID."""
+        logger.info("Updating ticket {}.", ticket_id)
         async with self._session_provider() as session:
             repository = TicketRepository(session)
             row = await repository.get_by_id(ticket_id)
             if row is None:
+                logger.warning("Unable to update ticket {} because it was not found.", ticket_id)
                 return None
             row = await repository.update(row, payload)
             await session.commit()
+            logger.info("Updated ticket {}.", ticket_id)
             return self._to_schema(row)
 
     async def delete_ticket(self, ticket_id: int) -> bool:
         """Delete one ticket by ID."""
+        logger.info("Deleting ticket {}.", ticket_id)
         async with self._session_provider() as session:
             repository = TicketRepository(session)
             result = await repository.delete(ticket_id)
             if result:
                 await session.commit()
+                logger.info("Deleted ticket {}.", ticket_id)
+            else:
+                logger.warning("Unable to delete ticket {} because it was not found.", ticket_id)
             return result
 
     async def seed_tickets(self, payloads: list[TicketCreateSchema]) -> SeedSummary:
@@ -131,45 +151,66 @@ class TicketService(TicketServiceContract):
 
     async def triage_ticket(self, ticket_id: int) -> TicketResponseSchema:
         """Run AI triage for one ticket and persist the results."""
+        started_at = perf_counter()
+        logger.info("Starting AI triage for ticket {}.", ticket_id)
         async with self._session_provider() as session:
             ticket_repository = TicketRepository(session)
             kb_repository = KBChunkRepository(session)
             embedding_repository = TicketEmbeddingRepository(session)
+            try:
+                ticket = await ticket_repository.get_by_id(ticket_id)
+                if ticket is None:
+                    logger.warning("AI triage failed because ticket {} was not found.", ticket_id)
+                    raise ValueError(f"Ticket {ticket_id} was not found")
 
-            ticket = await ticket_repository.get_by_id(ticket_id)
-            if ticket is None:
-                raise ValueError(f"Ticket {ticket_id} was not found")
+                query_text = build_query_text(ticket)
+                query_embedding = await self._ollama_client.embed_text(query_text)
+                logger.debug("Generated query embedding for ticket {}.", ticket_id)
+                kb_matches = await kb_repository.search_similar(query_embedding, top_k=KB_TOP_K)
+                ticket_matches = await embedding_repository.search_similar(
+                    query_embedding,
+                    exclude_ticket_id=ticket_id,
+                    top_k=TICKET_TOP_K,
+                )
+                logger.info(
+                    "Retrieved triage context for ticket {}: {} KB matches and {} similar tickets.",
+                    ticket_id,
+                    len(kb_matches),
+                    len(ticket_matches),
+                )
+                triage_result = await self._ollama_client.chat_json(build_prompt(ticket, kb_matches, ticket_matches))
+                ai_trace = build_ai_trace(
+                    query_text=query_text,
+                    kb_matches=kb_matches,
+                    ticket_matches=ticket_matches,
+                )
 
-            query_text = build_query_text(ticket)
-            query_embedding = await self._ollama_client.embed_text(query_text)
-            kb_matches = await kb_repository.search_similar(query_embedding, top_k=KB_TOP_K)
-            ticket_matches = await embedding_repository.search_similar(
-                query_embedding,
-                exclude_ticket_id=ticket_id,
-                top_k=TICKET_TOP_K,
-            )
-            triage_result = await self._ollama_client.chat_json(build_prompt(ticket, kb_matches, ticket_matches))
-            ai_trace = build_ai_trace(
-                query_text=query_text,
-                kb_matches=kb_matches,
-                ticket_matches=ticket_matches,
-            )
-
-            await ticket_repository.apply_triage(ticket, triage_result, ai_trace)
-            await embedding_repository.upsert(
-                ticket_id=ticket.id,
-                combined_text=build_ticket_embedding_text(ticket),
-                embedding=query_embedding,
-            )
-            await session.commit()
-            await session.refresh(ticket)
-            return self._to_schema(ticket)
+                await ticket_repository.apply_triage(ticket, triage_result, ai_trace)
+                await embedding_repository.upsert(
+                    ticket_id=ticket.id,
+                    combined_text=build_ticket_embedding_text(ticket),
+                    embedding=query_embedding,
+                )
+                await session.commit()
+                await session.refresh(ticket)
+                logger.info(
+                    "Completed AI triage for ticket {} in {:.2f}s.",
+                    ticket_id,
+                    perf_counter() - started_at,
+                )
+                return self._to_schema(ticket)
+            except Exception:
+                logger.exception("AI triage failed for ticket {}.", ticket_id)
+                raise
 
     async def triage_tickets(self, ticket_ids: list[int]) -> TriageBatchResult:
         """Run AI triage for a list of tickets concurrently."""
         if not ticket_ids:
+            logger.warning("Skipping AI triage because no ticket IDs were provided.")
             return TriageBatchResult(completed=[], failed={})
 
+        started_at = perf_counter()
+        logger.info("Starting AI triage batch for {} tickets: {}", len(ticket_ids), ticket_ids)
         results = await asyncio.gather(
             *(self.triage_ticket(ticket_id) for ticket_id in ticket_ids),
             return_exceptions=True,
@@ -180,9 +221,16 @@ class TicketService(TicketServiceContract):
         for ticket_id, result in zip(ticket_ids, results, strict=True):
             if isinstance(result, Exception):
                 failed[ticket_id] = str(result)
+                logger.warning("AI triage failed for ticket {}: {}", ticket_id, result)
                 continue
             completed.append(ticket_id)
 
+        logger.info(
+            "AI triage batch finished in {:.2f}s. Completed: {}. Failed: {}.",
+            perf_counter() - started_at,
+            completed,
+            failed,
+        )
         return TriageBatchResult(completed=completed, failed=failed)
 
     @staticmethod

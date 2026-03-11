@@ -137,6 +137,15 @@ class ServiceTicketServiceTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result.completed, [7])
         self.assertIn(999, result.failed)
 
+    async def test_triage_ticket_raises_for_missing_ticket(self) -> None:
+        service = TicketService(
+            session_provider=self.fake_get_session,
+            ollama_client=self.llm_client,
+        )
+
+        with self.assertRaisesRegex(ValueError, "Ticket 999 was not found"):
+            await service.triage_ticket(999)
+
 
 if __name__ == "__main__":
     unittest.main()

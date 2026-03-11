@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 
+from loguru import logger
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -87,6 +88,12 @@ class TicketRepository(TicketRepositoryContract):
         trace: TicketAITraceSchema,
     ) -> TicketModel:
         """Persist AI triage fields onto a ticket."""
+        logger.info(
+            "Persisting AI triage output for ticket {} with category {} and priority {}.",
+            ticket.id,
+            triage.category,
+            triage.priority,
+        )
         ticket.category = triage.category
         ticket.priority = triage.priority
         ticket.ai_summary = triage.summary
@@ -96,6 +103,7 @@ class TicketRepository(TicketRepositoryContract):
         ticket.ai_trace = trace.model_dump(mode="json")
         await self._session.flush()
         await self._session.refresh(ticket)
+        logger.debug("Persisted AI triage output for ticket {}.", ticket.id)
         return ticket
 
     async def delete(self, ticket_id: int) -> bool:

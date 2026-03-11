@@ -40,14 +40,37 @@ def add_expandable_row(table: Table) -> Table:
                         :icon="props.expand ? 'remove' : 'add'" />
                 </q-td>
                 <template v-for="col in props.cols" :key="col.name">
-                    <slot
-                        :name="'body-cell-' + col.name"
-                        v-bind="{ props: { ...props, col: col, value: col.value } }"
-                    >
-                        <q-td :props="props" :key="col.name">
+                    <q-td v-if="col.name === 'status'" :props="props" :key="col.name">
+                        <q-badge :color="props.row.status_color">
                             {{ col.value }}
-                        </q-td>
-                    </slot>
+                        </q-badge>
+                    </q-td>
+                    <q-td v-else-if="col.name === 'priority'" :props="props" :key="col.name">
+                        <q-badge :color="props.row.priority_color">
+                            {{ col.value }}
+                        </q-badge>
+                    </q-td>
+                    <q-td v-else-if="col.name === 'start'" :props="props" :key="col.name">
+                        <q-btn
+                            flat
+                            color="primary"
+                            no-caps
+                            :label="props.row.start"
+                            @click.stop="$parent.$emit('ticket-start', props.row)"
+                        />
+                    </q-td>
+                    <q-td v-else-if="col.name === 'close'" :props="props" :key="col.name">
+                        <q-btn
+                            flat
+                            color="negative"
+                            no-caps
+                            :label="props.row.close"
+                            @click.stop="$parent.$emit('ticket-close', props.row)"
+                        />
+                    </q-td>
+                    <q-td v-else :props="props" :key="col.name">
+                        {{ col.value }}
+                    </q-td>
                 </template>
             </q-tr>
             <q-tr v-show="props.expand" :props="props">

@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import json
 from functools import lru_cache
+from time import perf_counter
 from typing import Any
 
+from loguru import logger
 from ollama import AsyncClient
 
 from src.core.settings import get_settings
@@ -37,14 +39,26 @@ class OllamaClient:
 
     async def embed_text(self, text: str) -> list[float]:
         """Embed a single text string."""
+        started_at = perf_counter()
+        logger.debug("Requesting embedding from model {}.", self._embedding_model)
         response = await self._client.embed(model=self._embedding_model, input=text)
         embeddings = response.get("embeddings", [])
         if not embeddings:
+            logger.warning("Embedding model {} returned no embeddings.", self._embedding_model)
             raise OllamaResponseError("Ollama returned no embeddings")
-        return [float(value) for value in embeddings[0]]
+        vector = [float(value) for value in embeddings[0]]
+        logger.debug(
+            "Received embedding from model {} with {} dimensions in {:.2f}s.",
+            self._embedding_model,
+            len(vector),
+            perf_counter() - started_at,
+        )
+        return vector
 
     async def chat_json(self, prompt: str, *, system_prompt: str = SYSTEM_PROMPT) -> TriageResultSchema:
         """Generate a structured triage response."""
+        started_at = perf_counter()
+        logger.debug("Requesting structured chat response from model {}.", self._chat_model)
         response = await self._client.chat(
             model=self._chat_model,
             messages=[
@@ -57,7 +71,13 @@ class OllamaClient:
         message = response.get("message", {})
         content = message.get("content")
         payload = self._load_json_payload(content)
-        return TriageResultSchema.model_validate(payload)
+        result = TriageResultSchema.model_validate(payload)
+        logger.debug(
+            "Received structured chat response from model {} in {:.2f}s.",
+            self._chat_model,
+            perf_counter() - started_at,
+        )
+        return result
 
     @staticmethod
     def _load_json_payload(content: Any) -> dict[str, Any]:
@@ -77,9 +97,11 @@ class OllamaClient:
         try:
             payload = json.loads(normalized)
         except json.JSONDecodeError as exc:
+            logger.warning("Unable to parse structured JSON response from Ollama.")
             raise OllamaResponseError("Ollama returned invalid JSON") from exc
 
         if not isinstance(payload, dict):
+            logger.warning("Ollama returned a structured payload that is not a JSON object.")
             raise OllamaResponseError("Ollama JSON payload must be an object")
         return payload
 

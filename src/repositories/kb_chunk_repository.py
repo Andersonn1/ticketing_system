@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from loguru import logger
 from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -56,6 +57,7 @@ class KBChunkRepository(KBChunkRepositoryContract):
 
     async def search_similar(self, embedding: list[float], *, top_k: int) -> list[RetrievedKBMatchSchema]:
         """Return the most similar KB chunks for a query embedding."""
+        logger.debug("Searching for up to {} similar KB chunks.", top_k)
         vector = to_pgvector_str(embedding)
         result = await self._session.execute(
             text(
@@ -74,4 +76,6 @@ class KBChunkRepository(KBChunkRepositoryContract):
             ),
             {"embedding": vector, "top_k": top_k},
         )
-        return [RetrievedKBMatchSchema.model_validate(dict(row)) for row in result.mappings().all()]
+        matches = [RetrievedKBMatchSchema.model_validate(dict(row)) for row in result.mappings().all()]
+        logger.debug("KB chunk similarity search returned {} matches.", len(matches))
+        return matches

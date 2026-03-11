@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from loguru import logger
 from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -27,6 +28,7 @@ class TicketEmbeddingRepository(TicketEmbeddingRepositoryContract):
 
     async def upsert(self, *, ticket_id: int, combined_text: str, embedding: list[float]) -> TicketEmbeddingModel:
         """Insert or update the embedding for one ticket."""
+        logger.debug("Upserting embedding for ticket {}.", ticket_id)
         existing = await self.get_by_ticket_id(ticket_id)
         if existing is None:
             entity = TicketEmbeddingModel(
@@ -37,18 +39,21 @@ class TicketEmbeddingRepository(TicketEmbeddingRepositoryContract):
             self._session.add(entity)
             await self._session.flush()
             await self._session.refresh(entity)
+            logger.debug("Created a new embedding row for ticket {}.", ticket_id)
             return entity
 
         existing.combined_text = combined_text
         existing.embedding = embedding
         await self._session.flush()
         await self._session.refresh(existing)
+        logger.debug("Updated the existing embedding row for ticket {}.", ticket_id)
         return existing
 
     async def search_similar(
         self, embedding: list[float], *, exclude_ticket_id: int, top_k: int
     ) -> list[RetrievedTicketMatchSchema]:
         """Return similar tickets excluding the current ticket."""
+        logger.debug("Searching for up to {} similar tickets excluding ticket {}.", top_k, exclude_ticket_id)
         vector = to_pgvector_str(embedding)
         result = await self._session.execute(
             text(
@@ -72,4 +77,10 @@ class TicketEmbeddingRepository(TicketEmbeddingRepositoryContract):
                 "top_k": top_k,
             },
         )
-        return [RetrievedTicketMatchSchema.model_validate(dict(row)) for row in result.mappings().all()]
+        matches = [RetrievedTicketMatchSchema.model_validate(dict(row)) for row in result.mappings().all()]
+        logger.debug(
+            "Similar-ticket search excluding ticket {} returned {} matches.",
+            exclude_ticket_id,
+            len(matches),
+        )
+        return matches
