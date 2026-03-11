@@ -44,7 +44,7 @@ for template in "${templates[@]}"; do
 done
 
 pgpass_file="pgadmin/pgpass"
-pgpass_value="postgres:5432:*:ticketing_user:changeme"
+pgpass_value="postgres:5432:*:postgres:changeme"
 mkdir -p "$(dirname "${pgpass_file}")"
 
 if [[ -e "${pgpass_file}" && "${force}" != "--force" ]]; then
