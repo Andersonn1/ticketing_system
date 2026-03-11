@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
 from src.core.settings import get_settings
 from src.db.base import Base
-from src.models.service_ticket_model import ServiceTicketModel  # noqa: F401
+from src.models import KBChunkModel, TicketEmbeddingModel, TicketModel  # noqa: F401
 
 settings = get_settings()
 
@@ -62,9 +62,7 @@ async def run_migrations_online() -> None:
     configuration = config.get_section(config.config_ini_section) or {}
     configuration["sqlalchemy.url"] = get_url()
 
-    connectable = async_engine_from_config(
-        configuration=configuration, prefix="sqlalchemy.", poolclass=pool.NullPool
-    )
+    connectable = async_engine_from_config(configuration=configuration, prefix="sqlalchemy.", poolclass=pool.NullPool)
     async with connectable.connect() as connection:
         await connection.run_sync(do_run_migrations)
     await connectable.dispose()

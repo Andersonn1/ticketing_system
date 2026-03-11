@@ -1,5 +1,11 @@
 """Data repositories."""
 
-from .service_ticket_repository import ServiceTicketRepository
+from .kb_chunk_repository import KBChunkRepository
+from .ticket_embedding_repository import TicketEmbeddingRepository
+from .ticket_repository import TicketRepository
 
-__all__ = ["ServiceTicketRepository"]
+__all__ = [
+    "KBChunkRepository",
+    "TicketRepository",
+    "TicketEmbeddingRepository",
+]
