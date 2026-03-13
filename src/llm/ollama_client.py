@@ -112,6 +112,6 @@ def get_ollama_client() -> OllamaClient:
     settings = get_settings()
     return OllamaClient(
         host=settings.ollama_base_url,
-        chat_model=settings.chat_model,
-        embedding_model=settings.embedding_model,
+        chat_model=settings.ollama_chat_model,
+        embedding_model=settings.ollama_embedding_model,
     )

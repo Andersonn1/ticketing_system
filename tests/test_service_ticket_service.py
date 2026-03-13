@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import unittest
 from contextlib import asynccontextmanager
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 from src.models import (
     AIConfidence,
@@ -25,7 +25,7 @@ from src.services.contracts import SupportsTriageLLMContract
 from src.services.ticket_service import TicketService
 
 
-class FakeSession:
+class FakeSession(MagicMock):
     """Minimal async session for service tests."""
 
     def __init__(self) -> None:
@@ -145,7 +145,7 @@ class ServiceTicketServiceTests(unittest.IsolatedAsyncioTestCase):
     async def test_triage_ticket_updates_ticket_and_embedding(self) -> None:
         service = TicketService(
             session_provider=self.fake_get_session,
-            ollama_client=self.llm_client,
+            llm_client=self.llm_client,
         )
 
         result = await service.triage_ticket(7)
@@ -161,7 +161,7 @@ class ServiceTicketServiceTests(unittest.IsolatedAsyncioTestCase):
     async def test_triage_tickets_collects_failures(self) -> None:
         service = TicketService(
             session_provider=self.fake_get_session,
-            ollama_client=self.llm_client,
+            llm_client=self.llm_client,
         )
 
         result = await service.triage_tickets([7, 999])
@@ -172,7 +172,7 @@ class ServiceTicketServiceTests(unittest.IsolatedAsyncioTestCase):
     async def test_triage_ticket_raises_for_missing_ticket(self) -> None:
         service = TicketService(
             session_provider=self.fake_get_session,
-            ollama_client=self.llm_client,
+            llm_client=self.llm_client,
         )
 
         with self.assertRaisesRegex(ValueError, "Ticket 999 was not found"):
@@ -182,7 +182,7 @@ class ServiceTicketServiceTests(unittest.IsolatedAsyncioTestCase):
         self.fake_ticket.status = ServiceStatus.PENDING
         service = TicketService(
             session_provider=self.fake_get_session,
-            ollama_client=self.llm_client,
+            llm_client=self.llm_client,
         )
 
         with self.assertRaisesRegex(ValueError, "already being triaged"):
@@ -192,7 +192,7 @@ class ServiceTicketServiceTests(unittest.IsolatedAsyncioTestCase):
         self.fake_ticket.status = ServiceStatus.PENDING
         service = TicketService(
             session_provider=self.fake_get_session,
-            ollama_client=self.llm_client,
+            llm_client=self.llm_client,
         )
 
         with self.assertRaisesRegex(ValueError, "currently being triaged"):
@@ -204,11 +204,11 @@ class ServiceTicketServiceTests(unittest.IsolatedAsyncioTestCase):
     async def test_manual_triage_ticket_saves_manual_fields_for_open_ticket(self) -> None:
         service = TicketService(
             session_provider=self.fake_get_session,
-            ollama_client=self.llm_client,
+            llm_client=self.llm_client,
         )
 
         result = await service.manual_triage_ticket(7, self._manual_triage_payload(status=ServiceStatus.PENDING))
-
+        assert result is not None
         self.assertEqual(result.status, ServiceStatus.PENDING)
         self.assertEqual(result.manual_summary, "Investigated Canvas login sync issue.")
         self.assertEqual(result.manual_response, "We advised the student to wait for the sync delay to clear.")
@@ -220,11 +220,11 @@ class ServiceTicketServiceTests(unittest.IsolatedAsyncioTestCase):
         self.fake_ticket.status = ServiceStatus.PENDING
         service = TicketService(
             session_provider=self.fake_get_session,
-            ollama_client=self.llm_client,
+            llm_client=self.llm_client,
         )
 
         result = await service.manual_triage_ticket(7, self._manual_triage_payload(status=ServiceStatus.CLOSED))
-
+        assert result is not None
         self.assertEqual(result.status, ServiceStatus.CLOSED)
         self.assertEqual(result.priority, ServicePriority.MEDIUM)
         self.assertEqual(result.category, ServiceCategory.SOFTWARE)
@@ -233,7 +233,7 @@ class ServiceTicketServiceTests(unittest.IsolatedAsyncioTestCase):
         self.fake_ticket.status = ServiceStatus.CLOSED
         service = TicketService(
             session_provider=self.fake_get_session,
-            ollama_client=self.llm_client,
+            llm_client=self.llm_client,
         )
 
         with self.assertRaisesRegex(ValueError, "already been closed"):

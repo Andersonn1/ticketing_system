@@ -36,16 +36,16 @@ from .models import SeedSummary, TriageBatchResult
 class TicketService(TicketServiceContract):
     """Ticket Service."""
 
-    __slots__ = ("_ollama_client", "_session_provider")
+    __slots__ = ("_llm_client", "_session_provider")
 
     def __init__(
         self,
         *,
         session_provider: SessionProvider,
-        ollama_client: SupportsTriageLLMContract,
+        llm_client: SupportsTriageLLMContract,
     ) -> None:
         self._session_provider = session_provider
-        self._ollama_client = ollama_client
+        self._llm_client = llm_client
 
     async def list_tickets(self) -> list[TicketResponseSchema]:
         """Return all tickets from the database."""
@@ -158,7 +158,7 @@ class TicketService(TicketServiceContract):
         async with self._session_provider() as session:
             repository = KBChunkRepository(session)
             for doc in docs:
-                embedding = await self._ollama_client.embed_text(str(doc["chunk_text"]))
+                embedding = await self._llm_client.embed_text(str(doc["chunk_text"]))
                 await repository.upsert(
                     source_name=str(doc["source_name"]),
                     chunk_text=str(doc["chunk_text"]),
@@ -201,7 +201,7 @@ class TicketService(TicketServiceContract):
             logger.info("Ticket {} claimed for triage and moved to Pending.", ticket_id)
             try:
                 query_text = build_query_text(ticket)
-                query_embedding = await self._ollama_client.embed_text(query_text)
+                query_embedding = await self._llm_client.embed_text(query_text)
                 logger.debug("Generated query embedding for ticket {}.", ticket_id)
                 kb_matches = await kb_repository.search_similar(query_embedding, top_k=KB_TOP_K)
                 ticket_matches = await embedding_repository.search_similar(
@@ -215,7 +215,7 @@ class TicketService(TicketServiceContract):
                     len(kb_matches),
                     len(ticket_matches),
                 )
-                triage_result = await self._ollama_client.chat_json(build_prompt(ticket, kb_matches, ticket_matches))
+                triage_result = await self._llm_client.chat_json(build_prompt(ticket, kb_matches, ticket_matches))
                 ai_trace = build_ai_trace(
                     query_text=query_text,
                     kb_matches=kb_matches,

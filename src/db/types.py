@@ -18,7 +18,7 @@ class Vector(UserDefinedType):
 
     def bind_processor(self, dialect):
         del dialect
-        
+
         def process(value: list[float] | tuple[float, ...] | str | None) -> str | None:
             if value is None:
                 return None

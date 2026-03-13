@@ -37,7 +37,7 @@ class TicketServiceContract(Protocol):
         self,
         *,
         session_provider: SessionProvider,
-        ollama_client: SupportsTriageLLMContract,
+        llm_client: SupportsTriageLLMContract,
     ) -> None:
         """Initialize the service with explicit runtime dependencies."""
         ...

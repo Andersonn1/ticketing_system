@@ -5,7 +5,7 @@ from __future__ import annotations
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import AliasChoices, Field, PostgresDsn, SecretStr
+from pydantic import Field, PostgresDsn, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 VALID_LOG_LEVEL_NAMES = Literal["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG", "NOTSET"]
@@ -36,21 +36,28 @@ class Settings(BaseSettings):
     )
     log_file: str = Field(default="logs/app.log", description="Application log file path")
     log_file_rotation: str = Field(default="3 days", description="Application log file retention period")
-    chat_model: str = Field(..., description="The AI model that will be used")
-    embedding_model: str = Field(
-        ...,
-        description="The embedding model that will be used",
-        validation_alias=AliasChoices("EMBEDDING_MODEL", "EMBED_MODEL"),
-    )
-    model_provider: str = Field(default="ollama", description="The AI model provider")
+    ollama_chat_model: str = Field(..., description="The Ollama AI model that will be used")
+    ollama_embedding_model: str = Field(..., description="The Ollama embedding model that will be used")
     ollama_base_url: str = Field(
         default="http://localhost:11434",
         description="The Ollama base URL",
-        validation_alias=AliasChoices("OLLAMA_BASE_URL", "MODEL_PROVIDER_URL"),
     )
-    model_provider_api_key: SecretStr | None = Field(
+    openai_chat_model: str = Field(..., description="The OpenAI model that will be used")
+    openai_embedding_model: str = Field(
+        ...,
+        description="The OpenAI embedding model that will be used",
+    )
+    openai_provider_api_key: SecretStr | None = Field(
         default=None,
         description="The API key to use to auth with the AI provider",
+    )
+    openai_timeout_seconds: float = Field(
+        default=60,
+        description="Timeout in seconds for AI provider requests",
+    )
+    openai_max_retries: int = Field(
+        default=2,
+        description="Maximum retry count for AI provider requests",
     )
     db_name: str = Field(..., description="The postgres database name")
     db_user: str = Field(..., description="The postgres database user")

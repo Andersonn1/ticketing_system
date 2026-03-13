@@ -1,4 +1,4 @@
-"""LLM Contracts"""
+"""LLM client contracts."""
 
 from __future__ import annotations
 
@@ -8,15 +8,14 @@ from src.llm.prompt import SYSTEM_PROMPT
 from src.schemas import TriageResultSchema
 
 
-class OllamaClientContract(Protocol):
-    """Ollama LL Client Contract"""
+class LLMClientContract(Protocol):
+    """Shared async LLM client contract."""
 
     __slots__ = ("_client", "_chat_model", "_embedding_model")
 
     def __init__(
         self,
         *,
-        host: str,
         chat_model: str,
         embedding_model: str,
     ) -> None: ...
