@@ -55,8 +55,8 @@ def register() -> None:
         logger.info("Loading AI page ticket data.")
         data = await service.list_tickets()
         logger.info("AI page loaded {} tickets.", len(data))
-        with frame("AI Ticketing Example"):
-            table = ticket_table(title="AI Ticketing Service", data=data, service=service)
+        with frame("AI Assist"):
+            table = ticket_table(title="AI-Assisted Triage", data=data, service=service)
 
             async def refresh_table() -> None:
                 logger.info("Refreshing AI page ticket table.")
