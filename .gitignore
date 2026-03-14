@@ -14,3 +14,4 @@ logs/
 pgadmin/pgpass
 pgadmin.env
 postgres.env
+.DS_Store

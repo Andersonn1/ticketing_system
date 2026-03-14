@@ -20,6 +20,6 @@ def register() -> None:
         logger.info("Registering Manual Page")
         data = await service.list_tickets()
         logger.info("Manual page loaded {} tickets.", len(data))
-        with frame("Manual Ticketing Example"):
-            ticket_table(title="Manual Ticketing Service", data=data, service=service)
+        with frame("Support Queue"):
+            ticket_table(title="Support Queue", data=data, service=service)
         logger.success("Successfully Registered Manual Page!")
