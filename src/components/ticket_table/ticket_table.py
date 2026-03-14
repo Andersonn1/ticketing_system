@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from enum import StrEnum
-from typing import Any
+from typing import Any, Final
 
 from loguru import logger
 from nicegui import ui
@@ -23,12 +23,12 @@ from .manual_triage_modal import create_manual_triage_opener
 from .table_config import COLUMN_DEFAULTS, COLUMNS
 from .table_utils import add_expandable_row, add_search
 
-_ACTION_LABELS = {
+_ACTION_LABELS: Final[dict[str, str]] = {
     "triage": "Triage",
     "close": "Close",
 }
 
-_BADGE_COLORS = {
+_BADGE_COLORS: Final[dict[str, dict[str, str]]] = {
     "priority": {
         "High": "red",
         "Medium": "orange",

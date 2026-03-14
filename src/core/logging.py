@@ -32,7 +32,7 @@ def configure_logging() -> None:
         colorize=True,
     )
 
-    for log_path in (settings.log_file, str(_FALLBACK_LOG_FILE)):
+    for log_path in (settings.log_file, _FALLBACK_LOG_FILE.as_posix()):
         try:
             output_path = Path(log_path).expanduser()
             if output_path.parent != Path("."):

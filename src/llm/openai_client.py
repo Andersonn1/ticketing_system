@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from functools import lru_cache
 from time import perf_counter
-from typing import Any
+from typing import Any, Final, Literal
 
 from loguru import logger
 from openai import AsyncOpenAI
@@ -14,8 +14,8 @@ from src.core.settings import get_settings
 from src.llm.prompt import SYSTEM_PROMPT
 from src.schemas import TriageResultSchema
 
-OPENAI_PROVIDER_NAME = "openai"
-OPENAI_EMBEDDING_DIMENSIONS = 768
+OPENAI_PROVIDER_NAME: Final[Literal["openai"]] = "openai"
+OPENAI_EMBEDDING_DIMENSIONS: Final[int] = 768
 
 
 class OpenAIClientError(RuntimeError):

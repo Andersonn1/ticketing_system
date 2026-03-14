@@ -9,6 +9,7 @@ class Vector(UserDefinedType):
     """PGVector column type for migrations and ORM models."""
 
     cache_ok = True
+    __slots__ = "dimensions"
 
     def __init__(self, dimensions: int) -> None:
         self.dimensions = dimensions

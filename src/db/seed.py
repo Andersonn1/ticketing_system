@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Final
 
 from loguru import logger
 
@@ -24,7 +25,7 @@ class KBDoc:
     metadata: dict[str, str]
 
 
-KB_DOCS: list[KBDoc] = [
+KB_DOCS: Final[list[KBDoc]] = [
     KBDoc(
         source_name="password_reset_policy",
         chunk_text="If a student resets their password, access to Canvas and email may take up to 15 minutes to sync. Ask the student to wait 15 minutes, clear browser cache, and try again.",

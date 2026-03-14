@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+from typing import Final
+
 from src.models import TicketModel
 from src.schemas import RetrievedKBMatchSchema, RetrievedTicketMatchSchema
 
-SYSTEM_PROMPT = """
+SYSTEM_PROMPT: Final[str] = """
 You are a school IT help desk assistant.
 
 Return ONLY valid JSON.

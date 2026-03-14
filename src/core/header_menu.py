@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+from typing import Final
+
 from nicegui import app, ui
 
-NAV_LINKS: tuple[tuple[str, str], ...] = (
+NAV_LINKS: Final[tuple[tuple[str, str], ...]] = (
     ("Home", "/"),
     ("Submit Ticket", "/request"),
     ("Support Queue", "/manual"),
