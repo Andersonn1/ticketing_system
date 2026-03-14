@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from copy import deepcopy
 from functools import lru_cache
 from time import perf_counter
 from typing import Any, Final, Literal
@@ -60,6 +61,23 @@ def _openai_exception_types() -> tuple[type[Exception], ...]:
         BadRequestError,
         InternalServerError,
     )
+
+
+def _sanitize_openai_json_schema(node: Any) -> Any:
+    """Strip unsupported sibling keywords from JSON Schema $ref nodes."""
+    if isinstance(node, dict):
+        if "$ref" in node:
+            return {"$ref": node["$ref"]}
+        return {key: _sanitize_openai_json_schema(value) for key, value in node.items()}
+    if isinstance(node, list):
+        return [_sanitize_openai_json_schema(item) for item in node]
+    return node
+
+
+@lru_cache(maxsize=1)
+def _triage_response_schema() -> dict[str, Any]:
+    """Return an OpenAI-compatible structured-output schema for triage."""
+    return _sanitize_openai_json_schema(deepcopy(TriageResultSchema.model_json_schema()))
 
 
 class OpenAIClient:
@@ -200,7 +218,7 @@ class OpenAIClient:
                 "format": {
                     "type": "json_schema",
                     "name": "ticket_triage",
-                    "schema": TriageResultSchema.model_json_schema(),
+                    "schema": _triage_response_schema(),
                     "strict": True,
                 }
             },

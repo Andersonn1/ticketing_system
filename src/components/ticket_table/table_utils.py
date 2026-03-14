@@ -76,7 +76,7 @@ def add_expandable_row(table: Table) -> Table:
                 </template>
             </q-tr>
             <q-tr v-show="props.expand" :props="props">
-                <q-td colspan="100%">
+                <q-td>
                     <div class="q-pa-md row items-start q-gutter-md">
                         <q-card class="my-card" flat bordered>
                             <q-item>
@@ -88,15 +88,15 @@ def add_expandable_row(table: Table) -> Table:
                                 </q-item-section>
                             </q-item>
                             <q-separator />
-                            <q-card-section horizontal>
+                            <q-card-section horizontal style="text-wrap: auto; min-width:200px;">
                                 <q-card-section auto-width>
                                     <div class="text-subtitle2">Original Ticket</div>
                                     <div>{{ props.row.description }}</div>
                                 </q-card-section>
                                 <q-separator vertical />
-                                <q-card-section>
+                                <q-card-section style="text-wrap: auto;">
                                     <div class="row items-start q-col-gutter-md">
-                                        <div class="col-12 col-md-6">
+                                        <div class="col-3 col-md-3">
                                             <q-item>
                                                 <q-item-section>
                                                     <q-item-label>Manual Triage</q-item-label>
@@ -119,7 +119,7 @@ def add_expandable_row(table: Table) -> Table:
                                                 </q-item-section>
                                             </q-item>
                                         </div>
-                                        <div class="col-12 col-md-6">
+                                        <div class="col-9 col-md-9">
                                             <q-item>
                                                 <q-item-section>
                                                     <q-item-label>AI Triage</q-item-label>

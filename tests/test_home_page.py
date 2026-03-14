@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import unittest
+from pathlib import Path
 
 from src.core.header_menu import NAV_LINKS
-from src.pages.home_page import COMMON_REQUEST_AREAS, HOME_ACTIONS, HOME_FEATURES, HOME_STEPS, SUPPORT_EXPECTATIONS
+from src.pages.home_page import COMMON_REQUEST_AREAS, HOME_ACTIONS, HOME_FEATURES, HOME_STEPS, IMG_PATH, SUPPORT_EXPECTATIONS
 
 
 class HomePageContentTests(unittest.TestCase):
@@ -44,6 +45,12 @@ class HomePageContentTests(unittest.TestCase):
         self.assertEqual(len(HOME_STEPS), 3)
         self.assertEqual(len(COMMON_REQUEST_AREAS), 4)
         self.assertEqual(len(SUPPORT_EXPECTATIONS), 3)
+
+    def test_homepage_step_icons_use_served_assets_route(self) -> None:
+        self.assertEqual(IMG_PATH, "/assets")
+        asset_dir = Path(__file__).resolve().parents[1] / "src" / "pages" / "assets"
+        for index in range(1, len(HOME_STEPS) + 1):
+            self.assertTrue((asset_dir / f"{index}-solid.png").exists())
 
 
 if __name__ == "__main__":

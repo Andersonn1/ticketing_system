@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from fastapi import Request
 from loguru import logger
 from nicegui import app, ui
 from starlette.middleware.sessions import SessionMiddleware
+from starlette.staticfiles import StaticFiles
 
 from src.core.logging import configure_logging
 from src.db.migrations import run_startup_migrations
@@ -15,13 +18,15 @@ from src.dependencies import get_settings
 from src.pages import ai_service_page, home_page, manual_request_page, manual_service_page, metrics_page
 
 settings = get_settings()
+ASSETS_DIR = Path(__file__).resolve().parent / "pages" / "assets"
 
 
 # Application startup events
 async def _run_startup_tasks() -> None:
     """Run migrations, then seed data, and fail fast on errors."""
     configure_logging()
-
+    if not settings.reindex:
+        return
     try:
         logger.info("Running database migrations.")
         await run_startup_migrations()
@@ -62,6 +67,7 @@ app.on_startup(_run_startup_tasks)
 app.on_shutdown(_close_db)
 
 app.add_middleware(SessionMiddleware, secret_key=settings.session_key.get_secret_value())
+app.mount("/assets", StaticFiles(directory=ASSETS_DIR), name="assets")
 
 
 # Register Pages

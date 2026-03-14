@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 from loguru import logger
 from nicegui import ui
 
@@ -19,7 +17,7 @@ from .configs.home_config import (
     HomeAction,
 )
 
-IMG_PATH = Path(__file__).parent / "configs/assets"
+IMG_PATH = "/assets"
 
 
 def _render_home_action(action: HomeAction) -> None:
@@ -61,7 +59,7 @@ def register() -> None:
                     with ui.card().classes("col flex-1 min-w-[320px] p-6 gap-4"):
                         ui.label("How support works").classes("text-h5 font-semibold")
                         for index, step in enumerate(HOME_STEPS, start=1):
-                            icon = f"img:{IMG_PATH.as_posix().removeprefix('/')}/{str(index)}-solid.png"
+                            icon = f"img:{IMG_PATH}/{index}-solid.png"
                             with ui.row().classes("w-full items-start gap-3"):
                                 ui.avatar(
                                     icon,

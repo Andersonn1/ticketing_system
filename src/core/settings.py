@@ -36,6 +36,7 @@ class Settings(BaseSettings):
     )
     log_file: str = Field(default="logs/app.log", description="Application log file path")
     log_file_rotation: str = Field(default="3 days", description="Application log file retention period")
+    reindex: bool = Field(default=False, description="Where or not to reindex data")
     openai_chat_model: str = Field(..., description="The OpenAI model that will be used")
     openai_embedding_model: str = Field(
         ...,

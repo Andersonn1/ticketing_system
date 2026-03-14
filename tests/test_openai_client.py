@@ -11,11 +11,20 @@ from src.llm.openai_client import (
     OpenAIClient,
     OpenAIClientError,
     OpenAIResponseError,
+    _triage_response_schema,
 )
 
 
 class OpenAIClientTests(unittest.IsolatedAsyncioTestCase):
     """Verify OpenAI response parsing and error mapping."""
+
+    def test_triage_response_schema_strips_ref_sibling_keywords(self) -> None:
+        schema = _triage_response_schema()
+
+        self.assertEqual(schema["properties"]["category"], {"$ref": "#/$defs/ServiceCategory"})
+        self.assertEqual(schema["properties"]["priority"], {"$ref": "#/$defs/ServicePriority"})
+        self.assertEqual(schema["properties"]["department"], {"$ref": "#/$defs/ServiceDepartment"})
+        self.assertEqual(schema["properties"]["confidence"], {"$ref": "#/$defs/AIConfidence"})
 
     async def test_chat_json_parses_structured_output(self) -> None:
         fake_sdk_client = SimpleNamespace(
@@ -48,6 +57,8 @@ class OpenAIClientTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result.department.value, "helpdesk")
         self.assertEqual(result.confidence.value, "high")
         fake_sdk_client.responses.create.assert_awaited_once()
+        _, kwargs = fake_sdk_client.responses.create.await_args
+        self.assertEqual(kwargs["text"]["format"]["schema"], _triage_response_schema())
 
     async def test_chat_json_retries_once_after_invalid_json(self) -> None:
         fake_sdk_client = SimpleNamespace(
