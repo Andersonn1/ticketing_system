@@ -55,7 +55,7 @@ HOME_FEATURES: tuple[HomeFeature, ...] = (
     ),
     HomeFeature(
         "AI-Assisted Handling",
-        "Use cloud AI triage to summarize requests, recommend actions, and speed up repetitive service workflows.",
+        "Use AI triage to summarize requests, recommend actions, and speed up repetitive service workflows.",
         "auto_awesome",
     ),
 )
