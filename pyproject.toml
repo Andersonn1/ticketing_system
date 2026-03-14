@@ -5,6 +5,7 @@ description = "AI powered IT Ticket Triage System"
 authors = [
     { name = "Nathan Anderson", email = "n0a64415@marymount.edu" },
     { name = "Adhwa Altheyab", email = "a0a97644@marymount.edu" },
+    { name = "Farah Alregibah", email = "f0a97639@marymount.edu" },
 ]
 license = "MIT"
 license-files = ["LICENSE.md"]
@@ -26,15 +27,5 @@ dependencies = [
     "openai>=2.26.0",
 ]
 
-
-[project.urls]
-Homepage = "https://github.com/violit-dev/violit"
-Documentation = "https://github.com/violit-dev/violit"
-Repository = "https://github.com/violit-dev/violit"
-Issues = "https://github.com/violit-dev/violit/issues"
-
 [dependency-groups]
-dev = [
-    "pytest>=9.0.2",
- "ruff>=0.15.5",
-]
+dev = ["pytest>=9.0.2", "ruff>=0.15.5"]

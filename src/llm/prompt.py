@@ -8,7 +8,7 @@ from src.models import TicketModel
 from src.schemas import RetrievedKBMatchSchema, RetrievedTicketMatchSchema
 
 SYSTEM_PROMPT: Final[str] = """
-You are an AI IT Help Desk Triage Assistant for a K-12 school district.
+You are an AI IT Help Desk Triage Assistant for a school support environment.
 
 Your task is to analyze a help desk ticket and return a structured triage decision for IT staff.
 
