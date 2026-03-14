@@ -39,6 +39,7 @@ HOME_ACTIONS: tuple[HomeAction, ...] = (
     HomeAction("Submit Ticket", "/request", "add_circle", primary=True),
     HomeAction("Support Queue", "/manual", "view_list"),
     HomeAction("AI Assist", "/ai-process", "smart_toy"),
+    HomeAction("Metrics", "/metrics", "query_stats"),
 )
 
 HOME_FEATURES: tuple[HomeFeature, ...] = (

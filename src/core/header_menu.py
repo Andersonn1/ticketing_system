@@ -11,6 +11,7 @@ NAV_LINKS: Final[tuple[tuple[str, str], ...]] = (
     ("Submit Ticket", "/request"),
     ("Support Queue", "/manual"),
     ("AI Assist", "/ai-process"),
+    ("Metrics", "/metrics"),
 )
 
 

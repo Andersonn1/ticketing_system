@@ -12,7 +12,7 @@ from src.db.migrations import run_startup_migrations
 from src.db.seed import MOCK_DATA_PATH, run_seed
 from src.db.session import close_db_connection
 from src.dependencies import get_settings
-from src.pages import ai_service_page, home_page, manual_request_page, manual_service_page
+from src.pages import ai_service_page, home_page, manual_request_page, manual_service_page, metrics_page
 
 settings = get_settings()
 
@@ -74,6 +74,7 @@ home_page.register()
 manual_request_page.register()
 manual_service_page.register()
 ai_service_page.register()
+metrics_page.register()
 
 
 @app.get("/status")

@@ -55,6 +55,7 @@ def upgrade() -> None:
     bind = op.get_bind()
     NEW_CATEGORY_ENUM.create(bind, checkfirst=True)
     SERVICE_DEPARTMENT_ENUM.create(bind, checkfirst=True)
+    op.alter_column("ticket", "category", server_default=None)
 
     op.execute(
         """
@@ -144,6 +145,7 @@ def downgrade() -> None:
         name="service_category_v1",
     )
     old_category_enum.create(bind, checkfirst=True)
+    op.alter_column("ticket", "category", server_default=None)
 
     op.drop_index("idx_ticket_embedding_embedding", table_name="ticket_embedding")
     op.drop_index("idx_kb_chunk_embedding", table_name="kb_chunk")

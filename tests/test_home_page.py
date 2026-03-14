@@ -18,6 +18,7 @@ class HomePageContentTests(unittest.TestCase):
                 ("Submit Ticket", "/request", True),
                 ("Support Queue", "/manual", False),
                 ("AI Assist", "/ai-process", False),
+                ("Metrics", "/metrics", False),
             ],
         )
 
@@ -29,6 +30,7 @@ class HomePageContentTests(unittest.TestCase):
                 ("Submit Ticket", "/request"),
                 ("Support Queue", "/manual"),
                 ("AI Assist", "/ai-process"),
+                ("Metrics", "/metrics"),
             ),
         )
 
