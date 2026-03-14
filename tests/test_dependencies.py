@@ -30,47 +30,16 @@ class DependencyProviderTests(unittest.TestCase):
             dependencies._get_session = original_get_session
             dependencies.get_llm_client = original_get_llm_client
 
-    def test_get_llm_client_prefers_openai_when_api_key_is_present(self) -> None:
-        class FakeSecret:
-            def get_secret_value(self) -> str:
-                return "sk-test"
-
-        class FakeSettings:
-            model_provider_api_key = FakeSecret()
-
+    def test_get_llm_client_returns_openai_client(self) -> None:
         fake_client = object()
-        original_get_settings = dependencies.get_settings
-        try:
-            dependencies.get_settings = lambda: FakeSettings()  # type: ignore[assignment]
-            from src.llm import openai_client
+        from src.llm import openai_client
 
-            original_get_openai_client = openai_client.get_openai_client
+        original_get_openai_client = openai_client.get_openai_client
+        try:
             openai_client.get_openai_client = lambda: fake_client  # type: ignore[assignment]
-            try:
-                self.assertIs(dependencies.get_llm_client(), fake_client)
-            finally:
-                openai_client.get_openai_client = original_get_openai_client
+            self.assertIs(dependencies.get_llm_client(), fake_client)
         finally:
-            dependencies.get_settings = original_get_settings
-
-    def test_get_llm_client_falls_back_to_ollama_without_api_key(self) -> None:
-        class FakeSettings:
-            model_provider_api_key = None
-
-        fake_client = object()
-        original_get_settings = dependencies.get_settings
-        try:
-            dependencies.get_settings = lambda: FakeSettings()  # type: ignore[assignment]
-            from src.llm import ollama_client
-
-            original_get_ollama_client = ollama_client.get_ollama_client
-            ollama_client.get_ollama_client = lambda: fake_client  # type: ignore[assignment]
-            try:
-                self.assertIs(dependencies.get_llm_client(), fake_client)
-            finally:
-                ollama_client.get_ollama_client = original_get_ollama_client
-        finally:
-            dependencies.get_settings = original_get_settings
+            openai_client.get_openai_client = original_get_openai_client
 
     def test_page_registration_still_supports_dependency_injection(self) -> None:
         manual_request_page.register()

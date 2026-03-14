@@ -95,65 +95,61 @@ def add_expandable_row(table: Table) -> Table:
                                 </q-card-section>
                                 <q-separator vertical />
                                 <q-card-section>
-                                    <q-item>
-                                        <q-item-section>
-                                            <q-item-label>Manual Triage</q-item-label>
-                                            <div v-if="props.row.manual_summary || props.row.manual_response || (props.row.manual_next_steps && props.row.manual_next_steps.length)">
-                                                <div class="text-caption q-mt-sm">Summary</div>
-                                                <q-item-label caption>{{ props.row.manual_summary }}</q-item-label>
-                                                <q-separator spaced inset />
-                                                <div class="text-caption q-mt-sm">Response</div>
-                                                <q-item-label caption>{{ props.row.manual_response }}</q-item-label>
-                                                <q-separator spaced inset />
-                                                <div class="text-caption q-mt-sm">Next Steps</div>
-                                                <q-list bordered separator>
-                                                    <q-item v-for="step in props.row.manual_next_steps" :key="'manual-' + step" clickable v-ripple>
-                                                        {{ step }}
-                                                    </q-item>
-                                                </q-list>
-                                            </div>
-                                            <q-item-label v-else caption>No manual triage saved for this ticket yet.</q-item-label>
-                                        </q-item-section>
-                                    </q-item>
-                                    <q-separator spaced inset />
-                                    <q-item>
-                                        <q-item-section auto-width>
-                                            <q-item-label>AI Summary</q-item-label>
-                                            <q-item-label caption>{{props.row.ai_summary}}</q-item-label>
-                                        </q-item-section>  
-                                    </q-item>
-                                    <q-separator spaced inset />
-                                    <q-item>
-                                        <q-item-section>
-                                            <q-item-label>AI Response</q-item-label>
-                                            <q-item-label caption >{{props.row.ai_response }}</q-item-label>
-                                        </q-item-section>  
-                                     </q-item>
-                                    <q-separator spaced inset />
-                                    <q-item>
-                                        <q-item-section>
-                                            <q-item-label>AI Confidence</q-item-label>
-                                            <q-item-label caption >{{props.row.ai_confidence }}</q-item-label>
-                                        </q-item-section>  
-                                     </q-item>
-                                    <q-separator spaced inset />
-                                    <q-item>
-                                        <q-item-section>
-                                            <q-item-label>AI Category</q-item-label>
-                                            <q-item-label caption >{{props.row.category }}</q-item-label>
-                                        </q-item-section>  
-                                    </q-item>
-                                    <q-separator spaced inset />
-                                    <q-item>
-                                        <q-item-section>
-                                            <q-item-label>AI Next Steps</q-item-label>
-                                            <q-list bordered separator>
-                                                <q-item v-for="step in props.row.ai_next_steps" :props="props" :key="step" clickable v-ripple>
-                                                    {{step}}
-                                                </q-item>
-                                            </q-list>
-                                        </q-item-section>  
-                                    </q-item>
+                                    <div class="row items-start q-col-gutter-md">
+                                        <div class="col-12 col-md-6">
+                                            <q-item>
+                                                <q-item-section>
+                                                    <q-item-label>Manual Triage</q-item-label>
+                                                    <div v-if="props.row.manual_summary || props.row.manual_response || (props.row.manual_next_steps && props.row.manual_next_steps.length)">
+                                                        <div class="text-caption q-mt-sm">Summary</div>
+                                                        <q-item-label caption>{{ props.row.manual_summary || 'Not provided' }}</q-item-label>
+                                                        <q-separator spaced inset />
+                                                        <div class="text-caption q-mt-sm">Response</div>
+                                                        <q-item-label caption>{{ props.row.manual_response || 'Not provided' }}</q-item-label>
+                                                        <q-separator spaced inset />
+                                                        <div class="text-caption q-mt-sm">Next Steps</div>
+                                                        <q-list v-if="props.row.manual_next_steps && props.row.manual_next_steps.length" bordered separator>
+                                                            <q-item v-for="step in props.row.manual_next_steps" :key="'manual-' + step" clickable v-ripple>
+                                                                {{ step }}
+                                                            </q-item>
+                                                        </q-list>
+                                                        <q-item-label v-else caption>No manual next steps recorded.</q-item-label>
+                                                    </div>
+                                                    <q-item-label v-else caption>No manual triage saved for this ticket yet.</q-item-label>
+                                                </q-item-section>
+                                            </q-item>
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <q-item>
+                                                <q-item-section>
+                                                    <q-item-label>AI Triage</q-item-label>
+                                                    <div v-if="props.row.ai_summary || props.row.ai_recommended_action || props.row.ai_reasoning">
+                                                        <div class="text-caption q-mt-sm">Summary</div>
+                                                        <q-item-label caption>{{ props.row.ai_summary || 'Not provided' }}</q-item-label>
+                                                        <q-separator spaced inset />
+                                                        <div class="text-caption q-mt-sm">Recommended Action</div>
+                                                        <q-item-label caption>{{ props.row.ai_recommended_action || 'Not provided' }}</q-item-label>
+                                                        <q-separator spaced inset />
+                                                        <div class="text-caption q-mt-sm">Department</div>
+                                                        <q-item-label caption>{{ props.row.department || 'Not assigned' }}</q-item-label>
+                                                        <q-separator spaced inset />
+                                                        <div class="text-caption q-mt-sm">Confidence</div>
+                                                        <q-item-label caption>{{ props.row.ai_confidence || 'Not provided' }}</q-item-label>
+                                                        <q-separator spaced inset />
+                                                        <div class="text-caption q-mt-sm">Missing Information</div>
+                                                        <q-item-label caption>{{ props.row.ai_missing_information || 'Not provided' }}</q-item-label>
+                                                        <q-separator spaced inset />
+                                                        <div class="text-caption q-mt-sm">Reasoning</div>
+                                                        <q-item-label caption>{{ props.row.ai_reasoning || 'Not provided' }}</q-item-label>
+                                                        <q-separator spaced inset />
+                                                        <div class="text-caption q-mt-sm">Processing Time</div>
+                                                        <q-item-label caption>{{ props.row.ai_processing_ms ? (props.row.ai_processing_ms / 1000).toFixed(2) + ' seconds' : 'Not recorded' }}</q-item-label>
+                                                    </div>
+                                                    <q-item-label v-else caption>No AI triage saved for this ticket yet.</q-item-label>
+                                                </q-item-section>
+                                            </q-item>
+                                        </div>
+                                    </div>
                                     <q-separator spaced inset />
                                     <q-item>
                                         <q-item-section>

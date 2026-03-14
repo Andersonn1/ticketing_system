@@ -170,6 +170,26 @@ class TicketService(TicketServiceContract):
 
         return upserted
 
+    async def refresh_ticket_embeddings(self) -> int:
+        """Regenerate embeddings for all tickets so retrieval stays in sync with the active model."""
+        upserted = 0
+        async with self._session_provider() as session:
+            ticket_repository = TicketRepository(session)
+            embedding_repository = TicketEmbeddingRepository(session)
+            tickets = await ticket_repository.list_all()
+            for ticket in tickets:
+                combined_text = build_ticket_embedding_text(ticket)
+                embedding = await self._llm_client.embed_text(combined_text)
+                await embedding_repository.upsert(
+                    ticket_id=ticket.id,
+                    combined_text=combined_text,
+                    embedding=embedding,
+                )
+                upserted += 1
+            await session.commit()
+        logger.info("Regenerated {} ticket embeddings.", upserted)
+        return upserted
+
     async def triage_ticket(self, ticket_id: int) -> TicketResponseSchema:
         """Run AI triage for one ticket and persist the results."""
         started_at = perf_counter()
@@ -221,8 +241,9 @@ class TicketService(TicketServiceContract):
                     kb_matches=kb_matches,
                     ticket_matches=ticket_matches,
                 )
+                processing_ms = max(1, int((perf_counter() - started_at) * 1000))
 
-                await ticket_repository.apply_triage(ticket, triage_result, ai_trace)
+                await ticket_repository.apply_triage(ticket, triage_result, ai_trace, processing_ms)
                 await embedding_repository.upsert(
                     ticket_id=ticket.id,
                     combined_text=build_ticket_embedding_text(ticket),
@@ -347,9 +368,12 @@ class TicketService(TicketServiceContract):
             "status": row.status,
             "priority": row.priority,
             "category": row.category,
+            "department": row.department,
             "ai_summary": row.ai_summary,
-            "ai_response": row.ai_response,
-            "ai_next_steps": row.ai_next_steps or [],
+            "ai_recommended_action": row.ai_recommended_action,
+            "ai_missing_information": row.ai_missing_information,
+            "ai_reasoning": row.ai_reasoning,
+            "ai_processing_ms": row.ai_processing_ms,
             "manual_summary": row.manual_summary,
             "manual_response": row.manual_response,
             "manual_next_steps": row.manual_next_steps or [],

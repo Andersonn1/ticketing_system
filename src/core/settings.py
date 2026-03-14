@@ -36,20 +36,14 @@ class Settings(BaseSettings):
     )
     log_file: str = Field(default="logs/app.log", description="Application log file path")
     log_file_rotation: str = Field(default="3 days", description="Application log file retention period")
-    ollama_chat_model: str = Field(..., description="The Ollama AI model that will be used")
-    ollama_embedding_model: str = Field(..., description="The Ollama embedding model that will be used")
-    ollama_base_url: str = Field(
-        default="http://localhost:11434",
-        description="The Ollama base URL",
-    )
     openai_chat_model: str = Field(..., description="The OpenAI model that will be used")
     openai_embedding_model: str = Field(
         ...,
         description="The OpenAI embedding model that will be used",
     )
-    openai_provider_api_key: SecretStr | None = Field(
-        default=None,
-        description="The API key to use to auth with the AI provider",
+    openai_api_key: SecretStr = Field(
+        default=SecretStr(""),
+        description="The API key to use to auth with OpenAI",
     )
     openai_timeout_seconds: float = Field(
         default=60,

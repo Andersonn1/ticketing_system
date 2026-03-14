@@ -9,11 +9,17 @@ from pydantic import EmailStr, Field, field_serializer, field_validator
 from src.models import (
     AIConfidence,
     ServiceCategory,
+    ServiceDepartment,
     ServicePriority,
     ServiceStatus,
     UserRole,
 )
 from src.schemas.base import BaseSchema
+
+
+def _display_label(value: str) -> str:
+    """Convert stored enum values into human-readable labels."""
+    return value.replace("_", " ").title()
 
 
 class TicketCreateSchema(BaseSchema):
@@ -122,14 +128,19 @@ class TriageResultSchema(BaseSchema):
 
     category: ServiceCategory = Field(..., description="The category of the ticket")
     priority: ServicePriority = Field(..., description="The tickets priority level")
+    department: ServiceDepartment = Field(..., description="The team that should handle the ticket")
     summary: str = Field(..., description="The summary for the ticket")
-    response: str = Field(..., description="The response to the ticket")
-    next_steps: list[str] = Field(default_factory=list, description="Provided next steps")
+    recommended_action: str = Field(..., description="The recommended next action for IT staff")
     confidence: AIConfidence = Field(..., description="The confidence level service response")
+    missing_information: str = Field(..., description="Any information still missing from the ticket")
+    reasoning: str = Field(..., description="Short reasoning tied to the ticket context")
 
-    @field_serializer("priority", "category", "confidence")
-    def serialize_to_title(self, item: ServiceCategory | ServicePriority | AIConfidence) -> str:
-        return item.value.title()
+    @field_serializer("priority", "category", "department", "confidence")
+    def serialize_to_title(
+        self,
+        item: ServiceCategory | ServiceDepartment | ServicePriority | AIConfidence,
+    ) -> str:
+        return _display_label(item.value)
 
 
 class RetrievedKBMatchSchema(BaseSchema):
@@ -171,9 +182,12 @@ class TicketResponseSchema(BaseSchema):
     status: ServiceStatus = Field(..., description="The current status of the ticket")
     priority: ServicePriority = Field(..., description="The tickets priority level")
     category: ServiceCategory = Field(..., description="The category of the ticket")
+    department: ServiceDepartment | None = Field(default=None, description="The team assigned to the ticket")
     ai_summary: str | None = Field(default=None, description="The AI summary for the ticket")
-    ai_response: str | None = Field(default=None, description="The AI response to the ticket")
-    ai_next_steps: list[str] = Field(default_factory=list, description="Next steps provided by the AI")
+    ai_recommended_action: str | None = Field(default=None, description="The AI-recommended next action")
+    ai_missing_information: str | None = Field(default=None, description="Information the AI says is missing")
+    ai_reasoning: str | None = Field(default=None, description="The AI reasoning for the triage result")
+    ai_processing_ms: int | None = Field(default=None, description="Total AI processing time in milliseconds")
     manual_summary: str | None = Field(default=None, description="The manual summary for the ticket")
     manual_response: str | None = Field(default=None, description="The human-authored response to the ticket")
     manual_next_steps: list[str] = Field(default_factory=list, description="Next steps provided by a helpdesk worker")
@@ -185,14 +199,14 @@ class TicketResponseSchema(BaseSchema):
     created_at: datetime | None = Field(default=None, description="When the ticket was created")
     updated_at: datetime | None = Field(default=None, description="When the ticket was last updated")
 
-    @field_serializer("priority", "category", "status", "user_role", "ai_confidence")
+    @field_serializer("priority", "category", "department", "status", "user_role", "ai_confidence")
     def serialize_to_title(
         self,
-        item: ServiceStatus | ServiceCategory | ServicePriority | UserRole | AIConfidence | None,
+        item: ServiceStatus | ServiceCategory | ServiceDepartment | ServicePriority | UserRole | AIConfidence | None,
     ) -> str | None:
         if item is None:
             return None
-        return item.value.title()
+        return _display_label(item.value)
 
 
 class TicketUpdateSchema(TicketCreateSchema):

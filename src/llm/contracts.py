@@ -30,5 +30,5 @@ class LLMClientContract(Protocol):
 
     @staticmethod
     def _load_json_payload(content: Any) -> dict[str, Any]:
-        """Parse a JSON object from the Ollama chat response."""
+        """Parse a JSON object from the provider response."""
         ...

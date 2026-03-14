@@ -23,8 +23,9 @@ class OpenAIClientTests(unittest.IsolatedAsyncioTestCase):
                 create=AsyncMock(
                     return_value=SimpleNamespace(
                         output_text=(
-                            '{"category":"software","priority":"medium","summary":"Summary",'
-                            '"response":"Response","next_steps":["Step 1"],"confidence":"high"}'
+                            '{"category":"software_issue","priority":"medium","department":"helpdesk",'
+                            '"summary":"Summary","recommended_action":"Response","confidence":"high",'
+                            '"missing_information":"none","reasoning":"Because the ticket says so."}'
                         ),
                         _request_id="req_triage",
                     )
@@ -43,13 +44,54 @@ class OpenAIClientTests(unittest.IsolatedAsyncioTestCase):
 
         result = await client.chat_json("prompt")
 
-        self.assertEqual(result.category.value, "software")
+        self.assertEqual(result.category.value, "software_issue")
+        self.assertEqual(result.department.value, "helpdesk")
         self.assertEqual(result.confidence.value, "high")
         fake_sdk_client.responses.create.assert_awaited_once()
 
-    async def test_chat_json_rejects_invalid_json(self) -> None:
+    async def test_chat_json_retries_once_after_invalid_json(self) -> None:
         fake_sdk_client = SimpleNamespace(
-            responses=SimpleNamespace(create=AsyncMock(return_value=SimpleNamespace(output_text="not json"))),
+            responses=SimpleNamespace(
+                create=AsyncMock(
+                    side_effect=[
+                        SimpleNamespace(output_text="not json"),
+                        SimpleNamespace(
+                            output_text=(
+                                '{"category":"network","priority":"high","department":"network_team",'
+                                '"summary":"Summary","recommended_action":"Investigate the access point.",'
+                                '"confidence":"high","missing_information":"none",'
+                                '"reasoning":"The outage affects multiple users."}'
+                            )
+                        ),
+                    ]
+                )
+            ),
+            embeddings=SimpleNamespace(create=AsyncMock()),
+        )
+        with patch("src.llm.openai_client._build_async_openai", return_value=fake_sdk_client):
+            client = OpenAIClient(
+                api_key="sk-test",
+                chat_model="gpt-4o-mini",
+                embedding_model="text-embedding-3-small",
+                timeout_seconds=60,
+                max_retries=2,
+            )
+
+        result = await client.chat_json("prompt")
+
+        self.assertEqual(result.department.value, "network_team")
+        self.assertEqual(fake_sdk_client.responses.create.await_count, 2)
+
+    async def test_chat_json_rejects_invalid_json_after_retry(self) -> None:
+        fake_sdk_client = SimpleNamespace(
+            responses=SimpleNamespace(
+                create=AsyncMock(
+                    side_effect=[
+                        SimpleNamespace(output_text="not json"),
+                        SimpleNamespace(output_text="still not json"),
+                    ]
+                )
+            ),
             embeddings=SimpleNamespace(create=AsyncMock()),
         )
         with patch("src.llm.openai_client._build_async_openai", return_value=fake_sdk_client):
@@ -90,7 +132,7 @@ class OpenAIClientTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(result), OPENAI_EMBEDDING_DIMENSIONS)
         fake_sdk_client.embeddings.create.assert_awaited_once()
         _, kwargs = fake_sdk_client.embeddings.create.await_args
-        self.assertEqual(kwargs["dimensions"], OPENAI_EMBEDDING_DIMENSIONS)
+        self.assertNotIn("dimensions", kwargs)
 
     async def test_embed_text_rejects_empty_embedding(self) -> None:
         fake_sdk_client = SimpleNamespace(

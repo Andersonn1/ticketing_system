@@ -23,6 +23,6 @@ class TicketEmbeddingModel(Base):
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, nullable=False, autoincrement=True, unique=True)
     ticket_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("ticket.id", ondelete="CASCADE"), nullable=False)
     combined_text: Mapped[str] = mapped_column(Text, nullable=False)
-    embedding: Mapped[list[float] | None] = mapped_column(Vector(768), nullable=True)
+    embedding: Mapped[list[float] | None] = mapped_column(Vector(1536), nullable=True)
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
     ticket: Mapped["TicketModel"] = relationship("TicketModel", uselist=False, lazy="selectin")

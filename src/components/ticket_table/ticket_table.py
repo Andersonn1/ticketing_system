@@ -46,7 +46,7 @@ def _coerce_enum[TEnum: StrEnum](enum_cls: type[TEnum], value: TEnum | str) -> T
     """Convert table JSON values back into the canonical enum values."""
     if isinstance(value, enum_cls):
         return value
-    return enum_cls(str(value).strip().lower())
+    return enum_cls(str(value).strip().lower().replace(" ", "_"))
 
 
 def _badge_color(column_name: str, value: Any) -> str:

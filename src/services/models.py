@@ -21,6 +21,7 @@ class TicketSeedResult:
     summary: SeedSummary
     payloads_processed: int
     kb_chunks_upserted: int
+    ticket_embeddings_upserted: int
 
 
 @dataclass(slots=True)

@@ -6,7 +6,7 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Any
 
-from sqlalchemy import TIMESTAMP, BigInteger, Enum, String, Text, func, text
+from sqlalchemy import INTEGER, TIMESTAMP, BigInteger, Enum, String, Text, func, text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -42,11 +42,27 @@ class AIConfidence(StrEnum):
 class ServiceCategory(StrEnum):
     """High-level ticket category."""
 
-    HARDWARE = "hardware"
-    SOFTWARE = "software"
     NETWORK = "network"
-    SECURITY = "security"
-    OTHER = "other"
+    ACCOUNT_ACCESS = "account_access"
+    PASSWORD_RESET = "password_reset"
+    HARDWARE_ISSUE = "hardware_issue"
+    SOFTWARE_ISSUE = "software_issue"
+    PRINTER_ISSUE = "printer_issue"
+    EMAIL_ISSUE = "email_issue"
+    SECURITY_CONCERN = "security_concern"
+    STUDENT_DEVICE = "student_device"
+    CLASSROOM_TECHNOLOGY = "classroom_technology"
+    UNKNOWN = "unknown"
+
+
+class ServiceDepartment(StrEnum):
+    """Department assigned to a ticket."""
+
+    HELPDESK = "helpdesk"
+    NETWORK_TEAM = "network_team"
+    DEVICE_SUPPORT = "device_support"
+    SYSTEMS_ADMIN = "systems_admin"
+    SECURITY_TEAM = "security_team"
 
 
 class ServiceStatus(StrEnum):
@@ -85,11 +101,17 @@ class TicketModel(Base):
     category: Mapped[ServiceCategory] = mapped_column(
         Enum(ServiceCategory, name="service_category", create_constraint=False),
         nullable=False,
-        server_default=text("'OTHER'"),
+        server_default=text("'UNKNOWN'"),
+    )
+    department: Mapped[ServiceDepartment | None] = mapped_column(
+        Enum(ServiceDepartment, name="service_department", create_constraint=False),
+        nullable=True,
     )
     ai_summary: Mapped[str | None] = mapped_column(Text, nullable=True)
-    ai_response: Mapped[str | None] = mapped_column(Text, nullable=True)
-    ai_next_steps: Mapped[list[str]] = mapped_column(JSONB, nullable=False, server_default=text("'[]'::jsonb"))
+    ai_recommended_action: Mapped[str | None] = mapped_column(Text, nullable=True)
+    ai_missing_information: Mapped[str | None] = mapped_column(Text, nullable=True)
+    ai_reasoning: Mapped[str | None] = mapped_column(Text, nullable=True)
+    ai_processing_ms: Mapped[int | None] = mapped_column(INTEGER, nullable=True)
     manual_summary: Mapped[str | None] = mapped_column(Text, nullable=True)
     manual_response: Mapped[str | None] = mapped_column(Text, nullable=True)
     manual_next_steps: Mapped[list[str]] = mapped_column(JSONB, nullable=False, server_default=text("'[]'::jsonb"))

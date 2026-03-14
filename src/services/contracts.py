@@ -78,6 +78,10 @@ class TicketServiceContract(Protocol):
         """Upsert KB docs and their embeddings."""
         ...
 
+    async def refresh_ticket_embeddings(self) -> int:
+        """Regenerate embeddings for all tickets."""
+        ...
+
     async def triage_ticket(self, ticket_id: int) -> TicketResponseSchema:
         """Run AI triage for one ticket and persist the results."""
         ...

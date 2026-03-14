@@ -42,12 +42,14 @@ async def _run_startup_tasks() -> None:
            {} updated,
              {} skipped,
                {} payload(s) processed,
-                 {} KB chunk(s) upserted.""",
+                 {} KB chunk(s) upserted,
+                   {} ticket embedding(s) upserted.""",
         result.summary.created,
         result.summary.updated,
         result.summary.skipped,
         result.payloads_processed,
         result.kb_chunks_upserted,
+        result.ticket_embeddings_upserted,
     )
 
 

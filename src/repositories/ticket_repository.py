@@ -118,19 +118,24 @@ class TicketRepository(TicketRepositoryContract):
         ticket: TicketModel,
         triage: TriageResultSchema,
         trace: TicketAITraceSchema,
+        processing_ms: int,
     ) -> TicketModel:
         """Persist AI triage fields onto a ticket."""
         logger.info(
-            "Persisting AI triage output for ticket {} with category {} and priority {}.",
+            "Persisting AI triage output for ticket {} with category {}, priority {}, and department {}.",
             ticket.id,
             triage.category,
             triage.priority,
+            triage.department,
         )
         ticket.category = triage.category
         ticket.priority = triage.priority
+        ticket.department = triage.department
         ticket.ai_summary = triage.summary
-        ticket.ai_response = triage.response
-        ticket.ai_next_steps = triage.next_steps
+        ticket.ai_recommended_action = triage.recommended_action
+        ticket.ai_missing_information = triage.missing_information
+        ticket.ai_reasoning = triage.reasoning
+        ticket.ai_processing_ms = processing_ms
         ticket.ai_confidence = triage.confidence
         ticket.ai_trace = trace.model_dump(mode="json")
         await self._session.flush()

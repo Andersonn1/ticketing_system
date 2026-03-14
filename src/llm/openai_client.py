@@ -9,13 +9,14 @@ from typing import Any, Final, Literal
 
 from loguru import logger
 from openai import AsyncOpenAI
+from pydantic import ValidationError
 
 from src.core.settings import get_settings
 from src.llm.prompt import SYSTEM_PROMPT
 from src.schemas import TriageResultSchema
 
 OPENAI_PROVIDER_NAME: Final[Literal["openai"]] = "openai"
-OPENAI_EMBEDDING_DIMENSIONS: Final[int] = 768
+OPENAI_EMBEDDING_DIMENSIONS: Final[int] = 1536
 
 
 class OpenAIClientError(RuntimeError):
@@ -104,7 +105,6 @@ class OpenAIClient:
             response = await self._client.embeddings.create(
                 model=self._embedding_model,
                 input=text,
-                dimensions=self._embedding_dimensions,
                 encoding_format="float",
             )
             vector = self._extract_embedding(response)
@@ -147,20 +147,7 @@ class OpenAIClient:
             self._chat_model,
         )
         try:
-            response = await self._client.responses.create(
-                model=self._chat_model,
-                instructions=system_prompt,
-                input=prompt,
-                temperature=0,
-                text={
-                    "format": {
-                        "type": "json_schema",
-                        "name": "ticket_triage",
-                        "schema": TriageResultSchema.model_json_schema(),
-                        "strict": True,
-                    }
-                },
-            )
+            response = await self._request_structured_response(prompt, system_prompt=system_prompt)
         except authentication_error as exc:
             raise self._raise_provider_error("triage", self._chat_model, "authentication failed", exc) from exc
         except rate_limit_error as exc:
@@ -174,8 +161,25 @@ class OpenAIClient:
         except internal_server_error as exc:
             raise self._raise_provider_error("triage", self._chat_model, "server error", exc) from exc
 
-        payload = self._load_json_payload(self._extract_output_text(response))
-        result = TriageResultSchema.model_validate(payload)
+        try:
+            payload = self._load_json_payload(self._extract_output_text(response))
+            result = TriageResultSchema.model_validate(payload)
+        except (OpenAIResponseError, ValidationError):
+            logger.warning(
+                "Structured triage response from model {} was invalid; retrying once. Request ID: {}.",
+                self._chat_model,
+                self._extract_request_id(response) or "n/a",
+            )
+            recovery_response = await self._request_structured_response(
+                f"{prompt}\n\nThe last response was invalid. Return only JSON that exactly matches the schema.",
+                system_prompt=system_prompt,
+            )
+            try:
+                payload = self._load_json_payload(self._extract_output_text(recovery_response))
+                result = TriageResultSchema.model_validate(payload)
+                response = recovery_response
+            except (OpenAIResponseError, ValidationError) as recovery_exc:
+                raise OpenAIResponseError("OpenAI returned invalid structured triage output") from recovery_exc
         logger.debug(
             "Received structured chat response from provider {} model {} in {:.2f}s. Request ID: {}.",
             OPENAI_PROVIDER_NAME,
@@ -184,6 +188,23 @@ class OpenAIClient:
             self._extract_request_id(response) or "n/a",
         )
         return result
+
+    async def _request_structured_response(self, prompt: str, *, system_prompt: str) -> Any:
+        """Request strict JSON-schema output from OpenAI."""
+        return await self._client.responses.create(
+            model=self._chat_model,
+            instructions=system_prompt,
+            input=prompt,
+            temperature=0,
+            text={
+                "format": {
+                    "type": "json_schema",
+                    "name": "ticket_triage",
+                    "schema": TriageResultSchema.model_json_schema(),
+                    "strict": True,
+                }
+            },
+        )
 
     @staticmethod
     def _load_json_payload(content: Any) -> dict[str, Any]:
@@ -300,9 +321,9 @@ class OpenAIClient:
 def get_openai_client() -> OpenAIClient:
     """Build a cached OpenAI client from application settings."""
     settings = get_settings()
-    api_key = settings.openai_provider_api_key
-    if api_key is None or not api_key.get_secret_value().strip():
-        raise ValueError("MODEL_PROVIDER_API_KEY is required to build the OpenAI client")
+    api_key = settings.openai_api_key
+    if not api_key.get_secret_value().strip():
+        raise ValueError("OPENAI_API_KEY is required to build the OpenAI client")
 
     return OpenAIClient(
         api_key=api_key.get_secret_value(),
