@@ -143,7 +143,9 @@ class ServiceTicketServiceTests(unittest.IsolatedAsyncioTestCase):
         ticket.status = payload.status
         return ticket
 
-    def _apply_triage(self, ticket: TicketModel, triage: TriageResultSchema, trace: object, processing_ms: int) -> TicketModel:
+    def _apply_triage(
+        self, ticket: TicketModel, triage: TriageResultSchema, trace: object, processing_ms: int
+    ) -> TicketModel:
         del trace
         ticket.category = triage.category
         ticket.priority = triage.priority
