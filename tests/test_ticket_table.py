@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import unittest
-from unittest.mock import MagicMock
 
 from src.components.ticket_table.ticket_table import (
     _badge_color,
@@ -17,7 +16,7 @@ from src.models import ServiceCategory, ServicePriority, ServiceStatus, UserRole
 from src.schemas import TicketResponseSchema
 
 
-class FakeTable(MagicMock):
+class FakeTable:
     """Minimal table double for row replacement tests."""
 
     def __init__(self, rows: list[dict], selected: list[dict]) -> None:
@@ -71,7 +70,7 @@ class TicketTableHelperTests(unittest.TestCase):
             "description": "Login fails after reset",
             "status": "Open",
             "priority": "Low",
-            "category": "Other",
+            "category": "Unknown",
         }
 
         payload = _build_update_payload(row, ServiceStatus.CLOSED)
@@ -79,7 +78,7 @@ class TicketTableHelperTests(unittest.TestCase):
         self.assertEqual(payload.id, 42)
         self.assertEqual(payload.status, ServiceStatus.CLOSED)
         self.assertEqual(payload.priority, ServicePriority.LOW)
-        self.assertEqual(payload.category, ServiceCategory.OTHER)
+        self.assertEqual(payload.category, ServiceCategory.UNKNOWN)
         self.assertEqual(payload.user_role, UserRole.STUDENT)
 
     def test_sync_table_row_replaces_matching_row_without_clearing_selection(self) -> None:
@@ -92,10 +91,13 @@ class TicketTableHelperTests(unittest.TestCase):
             "description": "Login fails after reset",
             "status": "Open",
             "priority": "Low",
-            "category": "Other",
+            "category": "Unknown",
+            "department": None,
             "ai_summary": None,
-            "ai_response": None,
-            "ai_next_steps": [],
+            "ai_recommended_action": None,
+            "ai_missing_information": None,
+            "ai_reasoning": None,
+            "ai_processing_ms": None,
             "ai_confidence": None,
             "ai_trace": None,
             "created_at": None,
@@ -111,10 +113,13 @@ class TicketTableHelperTests(unittest.TestCase):
             description="Login fails after reset",
             status=ServiceStatus.CLOSED,
             priority=ServicePriority.LOW,
-            category=ServiceCategory.OTHER,
+            category=ServiceCategory.UNKNOWN,
+            department=None,
             ai_summary=None,
-            ai_response=None,
-            ai_next_steps=[],
+            ai_recommended_action=None,
+            ai_missing_information=None,
+            ai_reasoning=None,
+            ai_processing_ms=None,
             ai_confidence=None,
             ai_trace=None,
             created_at=None,
@@ -139,10 +144,13 @@ class TicketTableHelperTests(unittest.TestCase):
             description="Login fails after reset",
             status=ServiceStatus.OPEN,
             priority=ServicePriority.HIGH,
-            category=ServiceCategory.OTHER,
+            category=ServiceCategory.UNKNOWN,
+            department=None,
             ai_summary=None,
-            ai_response=None,
-            ai_next_steps=[],
+            ai_recommended_action=None,
+            ai_missing_information=None,
+            ai_reasoning=None,
+            ai_processing_ms=None,
             ai_confidence=None,
             ai_trace=None,
             created_at=None,

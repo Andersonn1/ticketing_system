@@ -25,13 +25,15 @@ def _row(**overrides: object) -> dict[str, object]:
         "description": "Login fails after reset",
         "status": "Open",
         "priority": "Low",
-        "category": "Other",
+        "category": "Unknown",
         "manual_summary": None,
         "manual_response": None,
         "manual_next_steps": [],
         "ai_summary": None,
-        "ai_response": None,
-        "ai_next_steps": [],
+        "ai_recommended_action": None,
+        "ai_missing_information": None,
+        "ai_reasoning": None,
+        "ai_processing_ms": None,
         "ai_confidence": None,
         "ai_trace": None,
         "created_at": None,
@@ -59,7 +61,7 @@ class ManualTriageModalHelperTests(unittest.TestCase):
             _row(
                 status="Pending",
                 priority="High",
-                category="Security",
+                category="Security Concern",
                 manual_summary="Existing summary",
                 manual_response="Existing response",
                 manual_next_steps=["Step one", "Step two"],
@@ -70,7 +72,7 @@ class ManualTriageModalHelperTests(unittest.TestCase):
         self.assertEqual(defaults["response"], "Existing response")
         self.assertEqual(defaults["next_steps"], "Step one\nStep two")
         self.assertEqual(defaults["priority"], "high")
-        self.assertEqual(defaults["category"], "security")
+        self.assertEqual(defaults["category"], "security_concern")
         self.assertEqual(defaults["status"], "pending")
 
     def test_build_manual_triage_payload_maps_modal_values(self) -> None:
@@ -81,7 +83,7 @@ class ManualTriageModalHelperTests(unittest.TestCase):
                 "response": "  We advised the student to retry after sync completes.  ",
                 "next_steps": " Wait 15 minutes. \n Retry Canvas after clearing cache. ",
                 "priority": "medium",
-                "category": "software",
+                "category": "software_issue",
                 "status": "closed",
             },
         )
@@ -90,7 +92,7 @@ class ManualTriageModalHelperTests(unittest.TestCase):
         self.assertEqual(payload.response, "We advised the student to retry after sync completes.")
         self.assertEqual(payload.next_steps, ["Wait 15 minutes.", "Retry Canvas after clearing cache."])
         self.assertEqual(payload.priority, ServicePriority.MEDIUM)
-        self.assertEqual(payload.category, ServiceCategory.SOFTWARE)
+        self.assertEqual(payload.category, ServiceCategory.SOFTWARE_ISSUE)
         self.assertEqual(payload.status, ServiceStatus.CLOSED)
 
     def test_manual_triage_success_message_mentions_status(self) -> None:
@@ -103,10 +105,13 @@ class ManualTriageModalHelperTests(unittest.TestCase):
             description="Login fails after reset",
             status=ServiceStatus.PENDING,
             priority=ServicePriority.MEDIUM,
-            category=ServiceCategory.SOFTWARE,
+            category=ServiceCategory.SOFTWARE_ISSUE,
+            department=None,
             ai_summary=None,
-            ai_response=None,
-            ai_next_steps=[],
+            ai_recommended_action=None,
+            ai_missing_information=None,
+            ai_reasoning=None,
+            ai_processing_ms=None,
             manual_summary="Summary",
             manual_response="Response",
             manual_next_steps=["Wait 15 minutes."],

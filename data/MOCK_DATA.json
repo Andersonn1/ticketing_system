@@ -40,5 +40,803 @@
     "user_role": "faculty",
     "title": "Antivirus warning after installing research tool",
     "description": "After installing a research application, Windows Security flagged the app and I am not sure whether it is safe to continue."
+  },
+  {
+    "requestor_name": "Avery Student",
+    "requestor_email": "avery.student@students.example.edu",
+    "user_role": "student",
+    "title": "Billing portal still shows tuition payment sync as pending",
+    "description": "The billing portal still shows tuition payment sync as unpaid even though the transaction already cleared. I was trying to complete the payment from my Windows 11 laptop while in the engineering building, and the account page never refreshed after switching from Chrome to Edge. The deadline tied to this task is in two days, so I need it fixed before the workflow closes."
+  },
+  {
+    "requestor_name": "Emerson Staff",
+    "requestor_email": "emerson.staff@staff.example.edu",
+    "user_role": "other",
+    "title": "Financial dashboard is missing my updated tuition payment sync",
+    "description": "The finance section in the billing portal never updates the tuition payment sync status after a successful payment session. I confirmed the receipt, then tried the same account from a second browser and the same stale balance remained. The deadline is in two days, and at least one other user in my group saw the same behavior on the same system."
+  },
+  {
+    "requestor_name": "Jordan Student",
+    "requestor_email": "jordan.student@students.example.edu",
+    "user_role": "student",
+    "title": "Campus card app will not load my student ID pickup pass",
+    "description": "The campus card app opens, but the QR pass for my student ID pickup pass never loads on my MacBook Air. I signed out, signed back in, and the screen stays blank instead of showing the pickup code. I can work around it for the moment, but I need the correct setup before next week."
+  },
+  {
+    "requestor_name": "Blake Vendor",
+    "requestor_email": "blake.vendor@vendors.example.edu",
+    "user_role": "vendor",
+    "title": "Badge kiosk cannot print my student ID pickup receipt",
+    "description": "The self-service badge kiosk in the north residence hall accepts my lookup, but it never prints the confirmation slip tied to my student ID pickup pass. A vendor-side restart did not clear the queue, and students are stuck at the final print step. This is not urgent, but I would like the system corrected before the next routine use."
+  },
+  {
+    "requestor_name": "Casey Student",
+    "requestor_email": "casey.student@students.example.edu",
+    "user_role": "student",
+    "title": "Sports sign-up page will not open in the campus portal",
+    "description": "When I open the sports sign-up page area from the student life portal, the page either spins forever or returns me to the home screen. I tried from a iPhone in the north residence hall, and the same broken page loaded after trying the same step from an incognito window. I can work around it for the moment, but I need the correct setup before next week."
+  },
+  {
+    "requestor_name": "Harper Faculty",
+    "requestor_email": "harper.faculty@faculty.example.edu",
+    "user_role": "faculty",
+    "title": "Registration email never arrived for sports sign-up",
+    "description": "I completed the sports sign-up page flow in the student life portal, but no confirmation email or follow-up link ever arrived in my school inbox. I checked spam, retried the form once, and still do not have the message that should confirm the registration. This is not urgent, but I would like the system corrected before the next routine use."
+  },
+  {
+    "requestor_name": "Morgan Student",
+    "requestor_email": "morgan.student@students.example.edu",
+    "user_role": "student",
+    "title": "Cannot join campus Wi-Fi from my classroom device",
+    "description": "My lab workstation sees the campus network in the student union, but the campus Wi-Fi login step fails every time I try to authenticate. I retried after clearing the browser cache, and the device still drops back to the sign-in prompt. I can work around it for the moment, but I need the correct setup before next week."
+  },
+  {
+    "requestor_name": "Mina Faculty",
+    "requestor_email": "mina.faculty@faculty.example.edu",
+    "user_role": "faculty",
+    "title": "Wireless onboarding portal keeps rejecting campus Wi-Fi login",
+    "description": "The wireless onboarding portal loads, but after I enter my school credentials it loops back to the start instead of completing the campus Wi-Fi login. Another user in the same area saw the same login loop on a second device. This is not urgent, but I would like the system corrected before the next routine use."
+  },
+  {
+    "requestor_name": "Riley Student",
+    "requestor_email": "riley.student@students.example.edu",
+    "user_role": "student",
+    "title": "Student portal blocks the elective change for semester 3 workflow",
+    "description": "The student portal opens the elective change for semester 3 page, but it errors out before I can submit the form. I tried from a classroom podium PC in the science annex, and the same page broke again after signing out and back in. This is blocking normal work for one user today, but it does not look like a campus-wide outage."
+  },
+  {
+    "requestor_name": "Darius Faculty",
+    "requestor_email": "darius.faculty@faculty.example.edu",
+    "user_role": "faculty",
+    "title": "Elective change for semester 3 page times out before submission",
+    "description": "I can reach the elective change for semester 3 section in the student portal, but the final submit action hangs until the browser times out. I repeated the workflow from two browsers and the timeout happens at the same step. I can continue once this path works again, but right now the system is stopping normal work."
+  },
+  {
+    "requestor_name": "Avery Student",
+    "requestor_email": "avery.student@students.example.edu",
+    "user_role": "student",
+    "title": "Canvas is missing Data Structures materials",
+    "description": "The Canvas course shell opens, but the Data Structures materials section is empty even though my classmates can see it. I re-synced the course list after switching from Chrome to Edge, and the materials still do not appear. This is blocking normal work for one user today, but it does not look like a campus-wide outage."
+  },
+  {
+    "requestor_name": "Casey Student",
+    "requestor_email": "casey.student@students.example.edu",
+    "user_role": "student",
+    "title": "Chromebook cannot open Data Structures materials in Canvas",
+    "description": "My Windows 11 laptop signs into Canvas, but every link for Data Structures materials fails to load and sends me back to the assignment list. I restarted the browser and tried a second network without changing the result. I can continue once this path works again, but right now the system is stopping normal work."
+  },
+  {
+    "requestor_name": "Jordan Student",
+    "requestor_email": "jordan.student@students.example.edu",
+    "user_role": "student",
+    "title": "Student portal shows the wrong status for grade sheet correction",
+    "description": "When I open the records section in the student portal, the page for grade sheet correction either shows the wrong status or never loads its details. I refreshed the portal after restarting the device, and the same incorrect state remained. This is blocking a required task today, so I need a fix before I miss the submission window."
+  },
+  {
+    "requestor_name": "Kendall Alum",
+    "requestor_email": "kendall.alum@alumni.example.edu",
+    "user_role": "alum",
+    "title": "Records screen fails before I can review grade sheet correction",
+    "description": "I can sign into the student portal, but the page for grade sheet correction errors out before I can download or verify the record. I tried from a MacBook Air in the library commons, and the failure happens at the same point each time. This is blocking a required task today, so I need a fix before I miss the submission window."
+  },
+  {
+    "requestor_name": "Casey Student",
+    "requestor_email": "casey.student@students.example.edu",
+    "user_role": "student",
+    "title": "Student portal blocks the course registration workflow",
+    "description": "The student portal opens the course registration page, but it errors out before I can submit the form. I tried from a MacBook Air in the library commons, and the same page broke again after trying the same step from an incognito window. This is blocking a required task today, so I need a fix before I miss the submission window."
+  },
+  {
+    "requestor_name": "Harper Faculty",
+    "requestor_email": "harper.faculty@faculty.example.edu",
+    "user_role": "faculty",
+    "title": "Course registration page times out before submission",
+    "description": "I can reach the course registration section in the student portal, but the final submit action hangs until the browser times out. I repeated the workflow from two browsers and the timeout happens at the same step. This is blocking a required task today, so I need a fix before I miss the submission window."
+  },
+  {
+    "requestor_name": "Morgan Student",
+    "requestor_email": "morgan.student@students.example.edu",
+    "user_role": "student",
+    "title": "Revaluation request is stuck in the portal workflow",
+    "description": "The student portal still shows revaluation request as pending even after the approval step should have moved forward. I opened the workflow from the north residence hall, retried after clearing the browser cache, and the status has not changed. This is blocking normal work for one user today, but it does not look like a campus-wide outage."
+  },
+  {
+    "requestor_name": "Mina Faculty",
+    "requestor_email": "mina.faculty@faculty.example.edu",
+    "user_role": "faculty",
+    "title": "Revaluation request page crashes before the deadline",
+    "description": "I can reach the revaluation request step in the student portal, but the page crashes when I submit the final approval details. The same crash happened on a second browser session from my lab workstation. I can continue once this path works again, but right now the system is stopping normal work."
+  },
+  {
+    "requestor_name": "Riley Student",
+    "requestor_email": "riley.student@students.example.edu",
+    "user_role": "student",
+    "title": "Canvas is missing Operating Systems materials",
+    "description": "The Canvas course shell opens, but the Operating Systems materials section is empty even though my classmates can see it. I re-synced the course list after signing out and back in, and the materials still do not appear. This is blocking normal work for one user today, but it does not look like a campus-wide outage."
+  },
+  {
+    "requestor_name": "Jordan Student",
+    "requestor_email": "jordan.student@students.example.edu",
+    "user_role": "student",
+    "title": "Chromebook cannot open Operating Systems materials in Canvas",
+    "description": "My classroom podium PC signs into Canvas, but every link for Operating Systems materials fails to load and sends me back to the assignment list. I restarted the browser and tried a second network without changing the result. I can continue once this path works again, but right now the system is stopping normal work."
+  },
+  {
+    "requestor_name": "Mina Faculty",
+    "requestor_email": "mina.faculty@faculty.example.edu",
+    "user_role": "faculty",
+    "title": "Campus app shows the wrong information for internship resources page",
+    "description": "The career services portal displays outdated or incomplete details for internship resources page, so I cannot trust the information it shows. I refreshed the app after switching from Chrome to Edge, and the same stale content remained on my classroom podium PC. This is blocking normal work for one user today, but it does not look like a campus-wide outage."
+  },
+  {
+    "requestor_name": "Taylor Vendor",
+    "requestor_email": "taylor.vendor@vendors.example.edu",
+    "user_role": "vendor",
+    "title": "Wayfinding kiosk search fails for internship resources page",
+    "description": "The digital kiosk in the business center stops responding whenever I search for internship resources page. A quick restart returns the home screen, but the search function fails again on the next lookup. I can continue once this path works again, but right now the system is stopping normal work."
+  },
+  {
+    "requestor_name": "Jordan Student",
+    "requestor_email": "jordan.student@students.example.edu",
+    "user_role": "student",
+    "title": "Student portal shows the wrong status for exam attendance record",
+    "description": "When I open the records section in the student portal, the page for exam attendance record either shows the wrong status or never loads its details. I refreshed the portal after restarting the device, and the same incorrect state remained. This is blocking a required task today, so I need a fix before I miss the submission window."
+  },
+  {
+    "requestor_name": "Kendall Alum",
+    "requestor_email": "kendall.alum@alumni.example.edu",
+    "user_role": "alum",
+    "title": "Records screen fails before I can review exam attendance record",
+    "description": "I can sign into the student portal, but the page for exam attendance record errors out before I can download or verify the record. I tried from a Windows 11 laptop in the engineering building, and the failure happens at the same point each time. This is blocking a required task today, so I need a fix before I miss the submission window."
+  },
+  {
+    "requestor_name": "Casey Student",
+    "requestor_email": "casey.student@students.example.edu",
+    "user_role": "student",
+    "title": "Student portal will not save the profile update form",
+    "description": "The student portal lets me edit the profile update form, but the save action fails and restores the old values. I retried after trying the same step from an incognito window, and the portal keeps discarding the updated information. This is blocking normal work for one user today, but it does not look like a campus-wide outage."
+  },
+  {
+    "requestor_name": "Harper Faculty",
+    "requestor_email": "harper.faculty@faculty.example.edu",
+    "user_role": "faculty",
+    "title": "MFA prompt loops when I try to open the profile update form",
+    "description": "Every time I open the profile update form in the student portal, the security prompt sends me back to the same verification page instead of letting me continue. I completed the MFA step twice on my MacBook Air, and the loop never clears. I can continue once this path works again, but right now the system is stopping normal work."
+  },
+  {
+    "requestor_name": "Morgan Student",
+    "requestor_email": "morgan.student@students.example.edu",
+    "user_role": "student",
+    "title": "Coding club registration page will not open in the campus portal",
+    "description": "When I open the coding club registration area from the student life portal, the page either spins forever or returns me to the home screen. I tried from a MacBook Air in the library commons, and the same broken page loaded after clearing the browser cache. I can work around it for the moment, but I need the correct setup before next week."
+  },
+  {
+    "requestor_name": "Mina Faculty",
+    "requestor_email": "mina.faculty@faculty.example.edu",
+    "user_role": "faculty",
+    "title": "Registration email never arrived for coding club registration",
+    "description": "I completed the coding club registration flow in the student life portal, but no confirmation email or follow-up link ever arrived in my school inbox. I checked spam, retried the form once, and still do not have the message that should confirm the registration. This is not urgent, but I would like the system corrected before the next routine use."
+  },
+  {
+    "requestor_name": "Riley Student",
+    "requestor_email": "riley.student@students.example.edu",
+    "user_role": "student",
+    "title": "Student portal will not save the document request form",
+    "description": "The student portal lets me edit the document request form, but the save action fails and restores the old values. I retried after signing out and back in, and the portal keeps discarding the updated information. This is blocking normal work for one user today, but it does not look like a campus-wide outage."
+  },
+  {
+    "requestor_name": "Darius Faculty",
+    "requestor_email": "darius.faculty@faculty.example.edu",
+    "user_role": "faculty",
+    "title": "MFA prompt loops when I try to open the document request form",
+    "description": "Every time I open the document request form in the student portal, the security prompt sends me back to the same verification page instead of letting me continue. I completed the MFA step twice on my lab workstation, and the loop never clears. I can continue once this path works again, but right now the system is stopping normal work."
+  },
+  {
+    "requestor_name": "Avery Student",
+    "requestor_email": "avery.student@students.example.edu",
+    "user_role": "student",
+    "title": "Cultural fest event schedule page will not open in the campus portal",
+    "description": "When I open the cultural fest event schedule area from the campus events site, the page either spins forever or returns me to the home screen. I tried from a lab workstation in the student union, and the same broken page loaded after switching from Chrome to Edge. I can work around it for the moment, but I need the correct setup before next week."
+  },
+  {
+    "requestor_name": "Sofia Faculty",
+    "requestor_email": "sofia.faculty@faculty.example.edu",
+    "user_role": "faculty",
+    "title": "Registration email never arrived for cultural fest event schedule",
+    "description": "I completed the cultural fest event schedule flow in the campus events site, but no confirmation email or follow-up link ever arrived in my school inbox. I checked spam, retried the form once, and still do not have the message that should confirm the registration. This is not urgent, but I would like the system corrected before the next routine use."
+  },
+  {
+    "requestor_name": "Jordan Student",
+    "requestor_email": "jordan.student@students.example.edu",
+    "user_role": "student",
+    "title": "Billing portal still shows scholarship credit status for semester 5 as pending",
+    "description": "The billing portal still shows scholarship credit status for semester 5 as unpaid even though the transaction already cleared. I was trying to complete the payment from my classroom podium PC while in the science annex, and the account page never refreshed after restarting the device. This is blocking a required task today, so I need a fix before I miss the submission window."
+  },
+  {
+    "requestor_name": "Finley Staff",
+    "requestor_email": "finley.staff@staff.example.edu",
+    "user_role": "other",
+    "title": "Financial dashboard is missing my updated scholarship credit status for semester 5",
+    "description": "The finance section in the billing portal never updates the scholarship credit status for semester 5 status after a successful payment session. I confirmed the receipt, then tried the same account from a second browser and the same stale balance remained. This is blocking a required task today, so I need a fix before I miss the submission window."
+  },
+  {
+    "requestor_name": "Sofia Faculty",
+    "requestor_email": "sofia.faculty@faculty.example.edu",
+    "user_role": "faculty",
+    "title": "Campus app shows the wrong information for faculty office hours",
+    "description": "The campus app displays outdated or incomplete details for faculty office hours, so I cannot trust the information it shows. I refreshed the app after trying the same step from an incognito window, and the same stale content remained on my district Chromebook. I can work around it for the moment, but I need the correct setup before next week."
+  },
+  {
+    "requestor_name": "Cameron Vendor",
+    "requestor_email": "cameron.vendor@vendors.example.edu",
+    "user_role": "vendor",
+    "title": "Wayfinding kiosk search fails for faculty office hours",
+    "description": "The digital kiosk in the engineering building stops responding whenever I search for faculty office hours. A quick restart returns the home screen, but the search function fails again on the next lookup. This is not urgent, but I would like the system corrected before the next routine use."
+  },
+  {
+    "requestor_name": "Elliot Faculty",
+    "requestor_email": "elliot.faculty@faculty.example.edu",
+    "user_role": "faculty",
+    "title": "Campus app shows the wrong information for weekend dining hours",
+    "description": "The campus app displays outdated or incomplete details for weekend dining hours, so I cannot trust the information it shows. I refreshed the app after clearing the browser cache, and the same stale content remained on my Windows 11 laptop. I can work around it for the moment, but I need the correct setup before next week."
+  },
+  {
+    "requestor_name": "Rowan Vendor",
+    "requestor_email": "rowan.vendor@vendors.example.edu",
+    "user_role": "vendor",
+    "title": "Wayfinding kiosk search fails for weekend dining hours",
+    "description": "The digital kiosk in the library commons stops responding whenever I search for weekend dining hours. A quick restart returns the home screen, but the search function fails again on the next lookup. This is not urgent, but I would like the system corrected before the next routine use."
+  },
+  {
+    "requestor_name": "Riley Student",
+    "requestor_email": "riley.student@students.example.edu",
+    "user_role": "student",
+    "title": "Student portal blocks the elective change for last semester workflow",
+    "description": "The student portal opens the elective change for last semester page, but it errors out before I can submit the form. I tried from a MacBook Air in the library commons, and the same page broke again after signing out and back in. This is blocking normal work for one user today, but it does not look like a campus-wide outage."
+  },
+  {
+    "requestor_name": "Darius Faculty",
+    "requestor_email": "darius.faculty@faculty.example.edu",
+    "user_role": "faculty",
+    "title": "Elective change for last semester page times out before submission",
+    "description": "I can reach the elective change for last semester section in the student portal, but the final submit action hangs until the browser times out. I repeated the workflow from two browsers and the timeout happens at the same step. I can continue once this path works again, but right now the system is stopping normal work."
+  },
+  {
+    "requestor_name": "Avery Student",
+    "requestor_email": "avery.student@students.example.edu",
+    "user_role": "student",
+    "title": "Student portal blocks the elective change for this semester workflow",
+    "description": "The student portal opens the elective change for this semester page, but it errors out before I can submit the form. I tried from a iPhone in the north residence hall, and the same page broke again after switching from Chrome to Edge. This is blocking normal work for one user today, but it does not look like a campus-wide outage."
+  },
+  {
+    "requestor_name": "Sofia Faculty",
+    "requestor_email": "sofia.faculty@faculty.example.edu",
+    "user_role": "faculty",
+    "title": "Elective change for this semester page times out before submission",
+    "description": "I can reach the elective change for this semester section in the student portal, but the final submit action hangs until the browser times out. I repeated the workflow from two browsers and the timeout happens at the same step. I can continue once this path works again, but right now the system is stopping normal work."
+  },
+  {
+    "requestor_name": "Jordan Student",
+    "requestor_email": "jordan.student@students.example.edu",
+    "user_role": "student",
+    "title": "Internship approval workflow is stuck in the portal workflow",
+    "description": "The student portal still shows internship approval workflow as pending even after the approval step should have moved forward. I opened the workflow from the student union, retried after restarting the device, and the status has not changed. The deadline tied to this task is this friday, so I need it fixed before the workflow closes."
+  },
+  {
+    "requestor_name": "Elliot Faculty",
+    "requestor_email": "elliot.faculty@faculty.example.edu",
+    "user_role": "faculty",
+    "title": "Internship approval workflow page crashes before the deadline",
+    "description": "I can reach the internship approval workflow step in the student portal, but the page crashes when I submit the final approval details. The same crash happened on a second browser session from my classroom podium PC. The deadline is this friday, and at least one other user in my group saw the same behavior on the same system."
+  },
+  {
+    "requestor_name": "Casey Student",
+    "requestor_email": "casey.student@students.example.edu",
+    "user_role": "student",
+    "title": "Student portal shows the wrong status for Database Systems attendance details",
+    "description": "When I open the records section in the student portal, the page for Database Systems attendance details either shows the wrong status or never loads its details. I refreshed the portal after trying the same step from an incognito window, and the same incorrect state remained. This is blocking normal work for one user today, but it does not look like a campus-wide outage."
+  },
+  {
+    "requestor_name": "Skyler Alum",
+    "requestor_email": "skyler.alum@alumni.example.edu",
+    "user_role": "alum",
+    "title": "Records screen fails before I can review Database Systems attendance details",
+    "description": "I can sign into the student portal, but the page for Database Systems attendance details errors out before I can download or verify the record. I tried from a district Chromebook in the business center, and the failure happens at the same point each time. I can continue once this path works again, but right now the system is stopping normal work."
+  },
+  {
+    "requestor_name": "Morgan Student",
+    "requestor_email": "morgan.student@students.example.edu",
+    "user_role": "student",
+    "title": "Student portal blocks the elective change for semester 5 workflow",
+    "description": "The student portal opens the elective change for semester 5 page, but it errors out before I can submit the form. I tried from a district Chromebook in the business center, and the same page broke again after clearing the browser cache. This is blocking normal work for one user today, but it does not look like a campus-wide outage."
+  },
+  {
+    "requestor_name": "Mina Faculty",
+    "requestor_email": "mina.faculty@faculty.example.edu",
+    "user_role": "faculty",
+    "title": "Elective change for semester 5 page times out before submission",
+    "description": "I can reach the elective change for semester 5 section in the student portal, but the final submit action hangs until the browser times out. I repeated the workflow from two browsers and the timeout happens at the same step. I can continue once this path works again, but right now the system is stopping normal work."
+  },
+  {
+    "requestor_name": "Riley Student",
+    "requestor_email": "riley.student@students.example.edu",
+    "user_role": "student",
+    "title": "Student portal shows the wrong status for admit card download",
+    "description": "When I open the records section in the student portal, the page for admit card download either shows the wrong status or never loads its details. I refreshed the portal after signing out and back in, and the same incorrect state remained. This is blocking a required task today, so I need a fix before I miss the submission window."
+  },
+  {
+    "requestor_name": "Quinn Alum",
+    "requestor_email": "quinn.alum@alumni.example.edu",
+    "user_role": "alum",
+    "title": "Records screen fails before I can review admit card download",
+    "description": "I can sign into the student portal, but the page for admit card download errors out before I can download or verify the record. I tried from a MacBook Air in the library commons, and the failure happens at the same point each time. This is blocking a required task today, so I need a fix before I miss the submission window."
+  },
+  {
+    "requestor_name": "Avery Student",
+    "requestor_email": "avery.student@students.example.edu",
+    "user_role": "student",
+    "title": "Student portal shows the wrong status for Data Structures attendance details",
+    "description": "When I open the records section in the student portal, the page for Data Structures attendance details either shows the wrong status or never loads its details. I refreshed the portal after switching from Chrome to Edge, and the same incorrect state remained. This is blocking normal work for one user today, but it does not look like a campus-wide outage."
+  },
+  {
+    "requestor_name": "Reese Alum",
+    "requestor_email": "reese.alum@alumni.example.edu",
+    "user_role": "alum",
+    "title": "Records screen fails before I can review Data Structures attendance details",
+    "description": "I can sign into the student portal, but the page for Data Structures attendance details errors out before I can download or verify the record. I tried from a iPhone in the north residence hall, and the failure happens at the same point each time. I can continue once this path works again, but right now the system is stopping normal work."
+  },
+  {
+    "requestor_name": "Darius Faculty",
+    "requestor_email": "darius.faculty@faculty.example.edu",
+    "user_role": "faculty",
+    "title": "Campus app shows the wrong information for midterm exam schedule",
+    "description": "The student portal displays outdated or incomplete details for midterm exam schedule, so I cannot trust the information it shows. I refreshed the app after restarting the device, and the same stale content remained on my iPhone. This is blocking normal work for one user today, but it does not look like a campus-wide outage."
+  },
+  {
+    "requestor_name": "Blake Vendor",
+    "requestor_email": "blake.vendor@vendors.example.edu",
+    "user_role": "vendor",
+    "title": "Wayfinding kiosk search fails for midterm exam schedule",
+    "description": "The digital kiosk in the student union stops responding whenever I search for midterm exam schedule. A quick restart returns the home screen, but the search function fails again on the next lookup. I can continue once this path works again, but right now the system is stopping normal work."
+  },
+  {
+    "requestor_name": "Casey Student",
+    "requestor_email": "casey.student@students.example.edu",
+    "user_role": "student",
+    "title": "Housing portal will not submit my room request",
+    "description": "The housing portal accepts every field in the housing request form, but the submit step never finishes. I tried from a lab workstation in the student union, and the spinner remains on screen after trying the same step from an incognito window. This is blocking normal work for one user today, but it does not look like a campus-wide outage."
+  },
+  {
+    "requestor_name": "Sawyer Staff",
+    "requestor_email": "sawyer.staff@staff.example.edu",
+    "user_role": "other",
+    "title": "Campus housing application page keeps spinning forever",
+    "description": "When I open the housing request workflow in the housing portal, the application page never finishes loading its room options. I retried on two networks and the same endless loading state remains. I can continue once this path works again, but right now the system is stopping normal work."
+  },
+  {
+    "requestor_name": "Morgan Student",
+    "requestor_email": "morgan.student@students.example.edu",
+    "user_role": "student",
+    "title": "AI workshop registration page will not open in the campus portal",
+    "description": "When I open the AI workshop registration area from the campus events site, the page either spins forever or returns me to the home screen. I tried from a classroom podium PC in the science annex, and the same broken page loaded after clearing the browser cache. I can work around it for the moment, but I need the correct setup before next week."
+  },
+  {
+    "requestor_name": "Mina Faculty",
+    "requestor_email": "mina.faculty@faculty.example.edu",
+    "user_role": "faculty",
+    "title": "Registration email never arrived for AI workshop registration",
+    "description": "I completed the AI workshop registration flow in the campus events site, but no confirmation email or follow-up link ever arrived in my school inbox. I checked spam, retried the form once, and still do not have the message that should confirm the registration. This is not urgent, but I would like the system corrected before the next routine use."
+  },
+  {
+    "requestor_name": "Riley Student",
+    "requestor_email": "riley.student@students.example.edu",
+    "user_role": "student",
+    "title": "Canvas is missing Database Systems materials",
+    "description": "The Canvas course shell opens, but the Database Systems materials section is empty even though my classmates can see it. I re-synced the course list after signing out and back in, and the materials still do not appear. This is blocking normal work for one user today, but it does not look like a campus-wide outage."
+  },
+  {
+    "requestor_name": "Jordan Student",
+    "requestor_email": "jordan.student@students.example.edu",
+    "user_role": "student",
+    "title": "Chromebook cannot open Database Systems materials in Canvas",
+    "description": "My Windows 11 laptop signs into Canvas, but every link for Database Systems materials fails to load and sends me back to the assignment list. I restarted the browser and tried a second network without changing the result. I can continue once this path works again, but right now the system is stopping normal work."
+  },
+  {
+    "requestor_name": "Avery Student",
+    "requestor_email": "avery.student@students.example.edu",
+    "user_role": "student",
+    "title": "Student portal shows the wrong status for last semester be declared results",
+    "description": "When I open the records section in the student portal, the page for last semester be declared results either shows the wrong status or never loads its details. I refreshed the portal after switching from Chrome to Edge, and the same incorrect state remained. This is blocking normal work for one user today, but it does not look like a campus-wide outage."
+  },
+  {
+    "requestor_name": "Reese Alum",
+    "requestor_email": "reese.alum@alumni.example.edu",
+    "user_role": "alum",
+    "title": "Records screen fails before I can review last semester be declared results",
+    "description": "I can sign into the student portal, but the page for last semester be declared results errors out before I can download or verify the record. I tried from a MacBook Air in the library commons, and the failure happens at the same point each time. I can continue once this path works again, but right now the system is stopping normal work."
+  },
+  {
+    "requestor_name": "Jordan Student",
+    "requestor_email": "jordan.student@students.example.edu",
+    "user_role": "student",
+    "title": "Internship approval workflow is stuck in the portal workflow",
+    "description": "The student portal still shows internship approval workflow as pending even after the approval step should have moved forward. I opened the workflow from the library commons, retried after restarting the device, and the status has not changed. The deadline tied to this task is today, so I need it fixed before the workflow closes."
+  },
+  {
+    "requestor_name": "Elliot Faculty",
+    "requestor_email": "elliot.faculty@faculty.example.edu",
+    "user_role": "faculty",
+    "title": "Internship approval workflow page crashes before the deadline",
+    "description": "I can reach the internship approval workflow step in the student portal, but the page crashes when I submit the final approval details. The same crash happened on a second browser session from my iPhone. The deadline is today, and at least one other user in my group saw the same behavior on the same system."
+  },
+  {
+    "requestor_name": "Casey Student",
+    "requestor_email": "casey.student@students.example.edu",
+    "user_role": "student",
+    "title": "Canvas is missing Machine Learning materials",
+    "description": "The Canvas course shell opens, but the Machine Learning materials section is empty even though my classmates can see it. I re-synced the course list after trying the same step from an incognito window, and the materials still do not appear. This is blocking normal work for one user today, but it does not look like a campus-wide outage."
+  },
+  {
+    "requestor_name": "Riley Student",
+    "requestor_email": "riley.student@students.example.edu",
+    "user_role": "student",
+    "title": "Chromebook cannot open Machine Learning materials in Canvas",
+    "description": "My lab workstation signs into Canvas, but every link for Machine Learning materials fails to load and sends me back to the assignment list. I restarted the browser and tried a second network without changing the result. I can continue once this path works again, but right now the system is stopping normal work."
+  },
+  {
+    "requestor_name": "Elliot Faculty",
+    "requestor_email": "elliot.faculty@faculty.example.edu",
+    "user_role": "faculty",
+    "title": "Campus app shows the wrong information for seminar hall map",
+    "description": "The wayfinding kiosk displays outdated or incomplete details for seminar hall map, so I cannot trust the information it shows. I refreshed the app after clearing the browser cache, and the same stale content remained on my lab workstation. I can work around it for the moment, but I need the correct setup before next week."
+  },
+  {
+    "requestor_name": "Rowan Vendor",
+    "requestor_email": "rowan.vendor@vendors.example.edu",
+    "user_role": "vendor",
+    "title": "Wayfinding kiosk search fails for seminar hall map",
+    "description": "The digital kiosk in the science annex stops responding whenever I search for seminar hall map. A quick restart returns the home screen, but the search function fails again on the next lookup. This is not urgent, but I would like the system corrected before the next routine use."
+  },
+  {
+    "requestor_name": "Riley Student",
+    "requestor_email": "riley.student@students.example.edu",
+    "user_role": "student",
+    "title": "Student portal blocks the exam form submission workflow",
+    "description": "The student portal opens the exam form submission page, but it errors out before I can submit the form. I tried from a classroom podium PC in the science annex, and the same page broke again after signing out and back in. The deadline tied to this task is in two days, so I need it fixed before the workflow closes."
+  },
+  {
+    "requestor_name": "Darius Faculty",
+    "requestor_email": "darius.faculty@faculty.example.edu",
+    "user_role": "faculty",
+    "title": "Exam form submission page times out before submission",
+    "description": "I can reach the exam form submission section in the student portal, but the final submit action hangs until the browser times out. I repeated the workflow from two browsers and the timeout happens at the same step. The deadline is in two days, and at least one other user in my group saw the same behavior on the same system."
+  },
+  {
+    "requestor_name": "Avery Student",
+    "requestor_email": "avery.student@students.example.edu",
+    "user_role": "student",
+    "title": "Student portal shows the wrong status for semester 3 be declared results",
+    "description": "When I open the records section in the student portal, the page for semester 3 be declared results either shows the wrong status or never loads its details. I refreshed the portal after switching from Chrome to Edge, and the same incorrect state remained. This is blocking normal work for one user today, but it does not look like a campus-wide outage."
+  },
+  {
+    "requestor_name": "Reese Alum",
+    "requestor_email": "reese.alum@alumni.example.edu",
+    "user_role": "alum",
+    "title": "Records screen fails before I can review semester 3 be declared results",
+    "description": "I can sign into the student portal, but the page for semester 3 be declared results errors out before I can download or verify the record. I tried from a Windows 11 laptop in the engineering building, and the failure happens at the same point each time. I can continue once this path works again, but right now the system is stopping normal work."
+  },
+  {
+    "requestor_name": "Jordan Student",
+    "requestor_email": "jordan.student@students.example.edu",
+    "user_role": "student",
+    "title": "Student portal blocks the exam form submission workflow",
+    "description": "The student portal opens the exam form submission page, but it errors out before I can submit the form. I tried from a Windows 11 laptop in the engineering building, and the same page broke again after restarting the device. The deadline tied to this task is tomorrow, so I need it fixed before the workflow closes."
+  },
+  {
+    "requestor_name": "Elliot Faculty",
+    "requestor_email": "elliot.faculty@faculty.example.edu",
+    "user_role": "faculty",
+    "title": "Exam form submission page times out before submission",
+    "description": "I can reach the exam form submission section in the student portal, but the final submit action hangs until the browser times out. I repeated the workflow from two browsers and the timeout happens at the same step. The deadline is tomorrow, and at least one other user in my group saw the same behavior on the same system."
+  },
+  {
+    "requestor_name": "Casey Student",
+    "requestor_email": "casey.student@students.example.edu",
+    "user_role": "student",
+    "title": "Student portal shows the wrong status for this semester be declared results",
+    "description": "When I open the records section in the student portal, the page for this semester be declared results either shows the wrong status or never loads its details. I refreshed the portal after trying the same step from an incognito window, and the same incorrect state remained. This is blocking normal work for one user today, but it does not look like a campus-wide outage."
+  },
+  {
+    "requestor_name": "Skyler Alum",
+    "requestor_email": "skyler.alum@alumni.example.edu",
+    "user_role": "alum",
+    "title": "Records screen fails before I can review this semester be declared results",
+    "description": "I can sign into the student portal, but the page for this semester be declared results errors out before I can download or verify the record. I tried from a iPhone in the north residence hall, and the failure happens at the same point each time. I can continue once this path works again, but right now the system is stopping normal work."
+  },
+  {
+    "requestor_name": "Morgan Student",
+    "requestor_email": "morgan.student@students.example.edu",
+    "user_role": "student",
+    "title": "Student portal shows the wrong status for Machine Learning attendance details",
+    "description": "When I open the records section in the student portal, the page for Machine Learning attendance details either shows the wrong status or never loads its details. I refreshed the portal after clearing the browser cache, and the same incorrect state remained. This is blocking normal work for one user today, but it does not look like a campus-wide outage."
+  },
+  {
+    "requestor_name": "Parker Alum",
+    "requestor_email": "parker.alum@alumni.example.edu",
+    "user_role": "alum",
+    "title": "Records screen fails before I can review Machine Learning attendance details",
+    "description": "I can sign into the student portal, but the page for Machine Learning attendance details errors out before I can download or verify the record. I tried from a lab workstation in the student union, and the failure happens at the same point each time. I can continue once this path works again, but right now the system is stopping normal work."
+  },
+  {
+    "requestor_name": "Harper Faculty",
+    "requestor_email": "harper.faculty@faculty.example.edu",
+    "user_role": "faculty",
+    "title": "Campus app shows the wrong information for holiday library hours",
+    "description": "The campus app displays outdated or incomplete details for holiday library hours, so I cannot trust the information it shows. I refreshed the app after signing out and back in, and the same stale content remained on my lab workstation. I can work around it for the moment, but I need the correct setup before next week."
+  },
+  {
+    "requestor_name": "Sydney Vendor",
+    "requestor_email": "sydney.vendor@vendors.example.edu",
+    "user_role": "vendor",
+    "title": "Wayfinding kiosk search fails for holiday library hours",
+    "description": "The digital kiosk in the science annex stops responding whenever I search for holiday library hours. A quick restart returns the home screen, but the search function fails again on the next lookup. This is not urgent, but I would like the system corrected before the next routine use."
+  },
+  {
+    "requestor_name": "Avery Student",
+    "requestor_email": "avery.student@students.example.edu",
+    "user_role": "student",
+    "title": "Billing portal still shows tuition payment sync as pending",
+    "description": "The billing portal still shows tuition payment sync as unpaid even though the transaction already cleared. I was trying to complete the payment from my classroom podium PC while in the science annex, and the account page never refreshed after switching from Chrome to Edge. The deadline tied to this task is tomorrow, so I need it fixed before the workflow closes."
+  },
+  {
+    "requestor_name": "Emerson Staff",
+    "requestor_email": "emerson.staff@staff.example.edu",
+    "user_role": "other",
+    "title": "Financial dashboard is missing my updated tuition payment sync",
+    "description": "The finance section in the billing portal never updates the tuition payment sync status after a successful payment session. I confirmed the receipt, then tried the same account from a second browser and the same stale balance remained. The deadline is tomorrow, and at least one other user in my group saw the same behavior on the same system."
+  },
+  {
+    "requestor_name": "Jordan Student",
+    "requestor_email": "jordan.student@students.example.edu",
+    "user_role": "student",
+    "title": "Internship approval workflow is stuck in the portal workflow",
+    "description": "The student portal still shows internship approval workflow as pending even after the approval step should have moved forward. I opened the workflow from the business center, retried after restarting the device, and the status has not changed. The deadline tied to this task is next week, so I need it fixed before the workflow closes."
+  },
+  {
+    "requestor_name": "Elliot Faculty",
+    "requestor_email": "elliot.faculty@faculty.example.edu",
+    "user_role": "faculty",
+    "title": "Internship approval workflow page crashes before the deadline",
+    "description": "I can reach the internship approval workflow step in the student portal, but the page crashes when I submit the final approval details. The same crash happened on a second browser session from my Windows 11 laptop. The deadline is next week, and at least one other user in my group saw the same behavior on the same system."
+  },
+  {
+    "requestor_name": "Casey Student",
+    "requestor_email": "casey.student@students.example.edu",
+    "user_role": "student",
+    "title": "Student portal shows the wrong status for semester 5 be declared results",
+    "description": "When I open the records section in the student portal, the page for semester 5 be declared results either shows the wrong status or never loads its details. I refreshed the portal after trying the same step from an incognito window, and the same incorrect state remained. This is blocking normal work for one user today, but it does not look like a campus-wide outage."
+  },
+  {
+    "requestor_name": "Skyler Alum",
+    "requestor_email": "skyler.alum@alumni.example.edu",
+    "user_role": "alum",
+    "title": "Records screen fails before I can review semester 5 be declared results",
+    "description": "I can sign into the student portal, but the page for semester 5 be declared results errors out before I can download or verify the record. I tried from a MacBook Air in the library commons, and the failure happens at the same point each time. I can continue once this path works again, but right now the system is stopping normal work."
+  },
+  {
+    "requestor_name": "Morgan Student",
+    "requestor_email": "morgan.student@students.example.edu",
+    "user_role": "student",
+    "title": "Billing portal still shows tuition payment sync as pending",
+    "description": "The billing portal still shows tuition payment sync as unpaid even though the transaction already cleared. I was trying to complete the payment from my MacBook Air while in the library commons, and the account page never refreshed after clearing the browser cache. The deadline tied to this task is today, so I need it fixed before the workflow closes."
+  },
+  {
+    "requestor_name": "Devon Staff",
+    "requestor_email": "devon.staff@staff.example.edu",
+    "user_role": "other",
+    "title": "Financial dashboard is missing my updated tuition payment sync",
+    "description": "The finance section in the billing portal never updates the tuition payment sync status after a successful payment session. I confirmed the receipt, then tried the same account from a second browser and the same stale balance remained. The deadline is today, and at least one other user in my group saw the same behavior on the same system."
+  },
+  {
+    "requestor_name": "Riley Student",
+    "requestor_email": "riley.student@students.example.edu",
+    "user_role": "student",
+    "title": "Student portal shows the wrong status for enrollment status correction",
+    "description": "When I open the records section in the student portal, the page for enrollment status correction either shows the wrong status or never loads its details. I refreshed the portal after signing out and back in, and the same incorrect state remained. This is blocking a required task today, so I need a fix before I miss the submission window."
+  },
+  {
+    "requestor_name": "Quinn Alum",
+    "requestor_email": "quinn.alum@alumni.example.edu",
+    "user_role": "alum",
+    "title": "Records screen fails before I can review enrollment status correction",
+    "description": "I can sign into the student portal, but the page for enrollment status correction errors out before I can download or verify the record. I tried from a lab workstation in the student union, and the failure happens at the same point each time. This is blocking a required task today, so I need a fix before I miss the submission window."
+  },
+  {
+    "requestor_name": "Avery Student",
+    "requestor_email": "avery.student@students.example.edu",
+    "user_role": "student",
+    "title": "Billing portal still shows tuition payment sync as pending",
+    "description": "The billing portal still shows tuition payment sync as unpaid even though the transaction already cleared. I was trying to complete the payment from my lab workstation while in the student union, and the account page never refreshed after switching from Chrome to Edge. The deadline tied to this task is this friday, so I need it fixed before the workflow closes."
+  },
+  {
+    "requestor_name": "Emerson Staff",
+    "requestor_email": "emerson.staff@staff.example.edu",
+    "user_role": "other",
+    "title": "Financial dashboard is missing my updated tuition payment sync",
+    "description": "The finance section in the billing portal never updates the tuition payment sync status after a successful payment session. I confirmed the receipt, then tried the same account from a second browser and the same stale balance remained. The deadline is this friday, and at least one other user in my group saw the same behavior on the same system."
+  },
+  {
+    "requestor_name": "Jordan Student",
+    "requestor_email": "jordan.student@students.example.edu",
+    "user_role": "student",
+    "title": "Billing portal still shows tuition payment sync as pending",
+    "description": "The billing portal still shows tuition payment sync as unpaid even though the transaction already cleared. I was trying to complete the payment from my classroom podium PC while in the science annex, and the account page never refreshed after restarting the device. The deadline tied to this task is next week, so I need it fixed before the workflow closes."
+  },
+  {
+    "requestor_name": "Finley Staff",
+    "requestor_email": "finley.staff@staff.example.edu",
+    "user_role": "other",
+    "title": "Financial dashboard is missing my updated tuition payment sync",
+    "description": "The finance section in the billing portal never updates the tuition payment sync status after a successful payment session. I confirmed the receipt, then tried the same account from a second browser and the same stale balance remained. The deadline is next week, and at least one other user in my group saw the same behavior on the same system."
+  },
+  {
+    "requestor_name": "Casey Student",
+    "requestor_email": "casey.student@students.example.edu",
+    "user_role": "student",
+    "title": "Internship approval workflow is stuck in the portal workflow",
+    "description": "The student portal still shows internship approval workflow as pending even after the approval step should have moved forward. I opened the workflow from the business center, retried after trying the same step from an incognito window, and the status has not changed. The deadline tied to this task is tomorrow, so I need it fixed before the workflow closes."
+  },
+  {
+    "requestor_name": "Harper Faculty",
+    "requestor_email": "harper.faculty@faculty.example.edu",
+    "user_role": "faculty",
+    "title": "Internship approval workflow page crashes before the deadline",
+    "description": "I can reach the internship approval workflow step in the student portal, but the page crashes when I submit the final approval details. The same crash happened on a second browser session from my Windows 11 laptop. The deadline is tomorrow, and at least one other user in my group saw the same behavior on the same system."
+  },
+  {
+    "requestor_name": "Morgan Student",
+    "requestor_email": "morgan.student@students.example.edu",
+    "user_role": "student",
+    "title": "Billing portal still shows scholarship credit status for last semester as pending",
+    "description": "The billing portal still shows scholarship credit status for last semester as unpaid even though the transaction already cleared. I was trying to complete the payment from my Windows 11 laptop while in the engineering building, and the account page never refreshed after clearing the browser cache. This is blocking a required task today, so I need a fix before I miss the submission window."
+  },
+  {
+    "requestor_name": "Devon Staff",
+    "requestor_email": "devon.staff@staff.example.edu",
+    "user_role": "other",
+    "title": "Financial dashboard is missing my updated scholarship credit status for last semester",
+    "description": "The finance section in the billing portal never updates the scholarship credit status for last semester status after a successful payment session. I confirmed the receipt, then tried the same account from a second browser and the same stale balance remained. This is blocking a required task today, so I need a fix before I miss the submission window."
+  },
+  {
+    "requestor_name": "Riley Student",
+    "requestor_email": "riley.student@students.example.edu",
+    "user_role": "student",
+    "title": "Internship approval workflow is stuck in the portal workflow",
+    "description": "The student portal still shows internship approval workflow as pending even after the approval step should have moved forward. I opened the workflow from the library commons, retried after signing out and back in, and the status has not changed. The deadline tied to this task is in two days, so I need it fixed before the workflow closes."
+  },
+  {
+    "requestor_name": "Darius Faculty",
+    "requestor_email": "darius.faculty@faculty.example.edu",
+    "user_role": "faculty",
+    "title": "Internship approval workflow page crashes before the deadline",
+    "description": "I can reach the internship approval workflow step in the student portal, but the page crashes when I submit the final approval details. The same crash happened on a second browser session from my iPhone. The deadline is in two days, and at least one other user in my group saw the same behavior on the same system."
+  },
+  {
+    "requestor_name": "Avery Student",
+    "requestor_email": "avery.student@students.example.edu",
+    "user_role": "student",
+    "title": "Billing portal still shows scholarship credit status for this semester as pending",
+    "description": "The billing portal still shows scholarship credit status for this semester as unpaid even though the transaction already cleared. I was trying to complete the payment from my iPhone while in the north residence hall, and the account page never refreshed after switching from Chrome to Edge. This is blocking a required task today, so I need a fix before I miss the submission window."
+  },
+  {
+    "requestor_name": "Emerson Staff",
+    "requestor_email": "emerson.staff@staff.example.edu",
+    "user_role": "other",
+    "title": "Financial dashboard is missing my updated scholarship credit status for this semester",
+    "description": "The finance section in the billing portal never updates the scholarship credit status for this semester status after a successful payment session. I confirmed the receipt, then tried the same account from a second browser and the same stale balance remained. This is blocking a required task today, so I need a fix before I miss the submission window."
+  },
+  {
+    "requestor_name": "Jordan Student",
+    "requestor_email": "jordan.student@students.example.edu",
+    "user_role": "student",
+    "title": "Project submission approval is stuck in the portal workflow",
+    "description": "The student portal still shows project submission approval as pending even after the approval step should have moved forward. I opened the workflow from the student union, retried after restarting the device, and the status has not changed. The deadline tied to this task is today, so I need it fixed before the workflow closes."
+  },
+  {
+    "requestor_name": "Elliot Faculty",
+    "requestor_email": "elliot.faculty@faculty.example.edu",
+    "user_role": "faculty",
+    "title": "Project submission approval page crashes before the deadline",
+    "description": "I can reach the project submission approval step in the student portal, but the page crashes when I submit the final approval details. The same crash happened on a second browser session from my classroom podium PC. The deadline is today, and at least one other user in my group saw the same behavior on the same system."
+  },
+  {
+    "requestor_name": "Casey Student",
+    "requestor_email": "casey.student@students.example.edu",
+    "user_role": "student",
+    "title": "Billing portal still shows scholarship credit status for semester 3 as pending",
+    "description": "The billing portal still shows scholarship credit status for semester 3 as unpaid even though the transaction already cleared. I was trying to complete the payment from my classroom podium PC while in the science annex, and the account page never refreshed after trying the same step from an incognito window. This is blocking a required task today, so I need a fix before I miss the submission window."
+  },
+  {
+    "requestor_name": "Sawyer Staff",
+    "requestor_email": "sawyer.staff@staff.example.edu",
+    "user_role": "other",
+    "title": "Financial dashboard is missing my updated scholarship credit status for semester 3",
+    "description": "The finance section in the billing portal never updates the scholarship credit status for semester 3 status after a successful payment session. I confirmed the receipt, then tried the same account from a second browser and the same stale balance remained. This is blocking a required task today, so I need a fix before I miss the submission window."
+  },
+  {
+    "requestor_name": "Morgan Student",
+    "requestor_email": "morgan.student@students.example.edu",
+    "user_role": "student",
+    "title": "Student portal blocks the exam form submission workflow",
+    "description": "The student portal opens the exam form submission page, but it errors out before I can submit the form. I tried from a district Chromebook in the business center, and the same page broke again after clearing the browser cache. The deadline tied to this task is next week, so I need it fixed before the workflow closes."
+  },
+  {
+    "requestor_name": "Mina Faculty",
+    "requestor_email": "mina.faculty@faculty.example.edu",
+    "user_role": "faculty",
+    "title": "Exam form submission page times out before submission",
+    "description": "I can reach the exam form submission section in the student portal, but the final submit action hangs until the browser times out. I repeated the workflow from two browsers and the timeout happens at the same step. The deadline is next week, and at least one other user in my group saw the same behavior on the same system."
+  },
+  {
+    "requestor_name": "Riley Student",
+    "requestor_email": "riley.student@students.example.edu",
+    "user_role": "student",
+    "title": "Student portal blocks the exam form submission workflow",
+    "description": "The student portal opens the exam form submission page, but it errors out before I can submit the form. I tried from a Windows 11 laptop in the engineering building, and the same page broke again after signing out and back in. The deadline tied to this task is this friday, so I need it fixed before the workflow closes."
+  },
+  {
+    "requestor_name": "Darius Faculty",
+    "requestor_email": "darius.faculty@faculty.example.edu",
+    "user_role": "faculty",
+    "title": "Exam form submission page times out before submission",
+    "description": "I can reach the exam form submission section in the student portal, but the final submit action hangs until the browser times out. I repeated the workflow from two browsers and the timeout happens at the same step. The deadline is this friday, and at least one other user in my group saw the same behavior on the same system."
+  },
+  {
+    "requestor_name": "Avery Student",
+    "requestor_email": "avery.student@students.example.edu",
+    "user_role": "student",
+    "title": "Student portal shows the wrong status for Operating Systems attendance details",
+    "description": "When I open the records section in the student portal, the page for Operating Systems attendance details either shows the wrong status or never loads its details. I refreshed the portal after switching from Chrome to Edge, and the same incorrect state remained. This is blocking normal work for one user today, but it does not look like a campus-wide outage."
+  },
+  {
+    "requestor_name": "Reese Alum",
+    "requestor_email": "reese.alum@alumni.example.edu",
+    "user_role": "alum",
+    "title": "Records screen fails before I can review Operating Systems attendance details",
+    "description": "I can sign into the student portal, but the page for Operating Systems attendance details errors out before I can download or verify the record. I tried from a iPhone in the north residence hall, and the failure happens at the same point each time. I can continue once this path works again, but right now the system is stopping normal work."
+  },
+  {
+    "requestor_name": "Jordan Student",
+    "requestor_email": "jordan.student@students.example.edu",
+    "user_role": "student",
+    "title": "Student portal blocks the exam form submission workflow",
+    "description": "The student portal opens the exam form submission page, but it errors out before I can submit the form. I tried from a iPhone in the north residence hall, and the same page broke again after restarting the device. The deadline tied to this task is today, so I need it fixed before the workflow closes."
+  },
+  {
+    "requestor_name": "Elliot Faculty",
+    "requestor_email": "elliot.faculty@faculty.example.edu",
+    "user_role": "faculty",
+    "title": "Exam form submission page times out before submission",
+    "description": "I can reach the exam form submission section in the student portal, but the final submit action hangs until the browser times out. I repeated the workflow from two browsers and the timeout happens at the same step. The deadline is today, and at least one other user in my group saw the same behavior on the same system."
   }
 ]

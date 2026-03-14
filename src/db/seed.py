@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Final
 
 from loguru import logger
 
@@ -24,11 +25,11 @@ class KBDoc:
     metadata: dict[str, str]
 
 
-KB_DOCS: list[KBDoc] = [
+KB_DOCS: Final[list[KBDoc]] = [
     KBDoc(
         source_name="password_reset_policy",
         chunk_text="If a student resets their password, access to Canvas and email may take up to 15 minutes to sync. Ask the student to wait 15 minutes, clear browser cache, and try again.",
-        metadata={"category": "authentication"},
+        metadata={"category": "password_reset"},
     ),
     KBDoc(
         source_name="wifi_troubleshooting",
@@ -38,12 +39,12 @@ KB_DOCS: list[KBDoc] = [
     KBDoc(
         source_name="printer_setup_library",
         chunk_text="Library printers require the school print client. Install the printer package, restart the device, and ensure the user is on campus network or VPN.",
-        metadata={"category": "printing"},
+        metadata={"category": "printer_issue"},
     ),
     KBDoc(
         source_name="mfa_enrollment",
         chunk_text="If MFA setup fails, confirm device time is synced, remove stale authenticator entries, and retry enrollment from the student portal.",
-        metadata={"category": "authentication"},
+        metadata={"category": "security_concern"},
     ),
 ]
 
@@ -73,8 +74,10 @@ async def run_seed(path: Path = MOCK_DATA_PATH) -> TicketSeedResult:
             for doc in KB_DOCS
         ]
     )
+    ticket_embeddings_upserted = await service.refresh_ticket_embeddings()
     return TicketSeedResult(
         summary=summary,
         payloads_processed=len(ticket_payloads),
         kb_chunks_upserted=kb_chunks_upserted,
+        ticket_embeddings_upserted=ticket_embeddings_upserted,
     )

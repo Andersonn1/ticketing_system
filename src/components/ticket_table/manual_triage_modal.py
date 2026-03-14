@@ -15,11 +15,16 @@ from src.schemas import ManualTriageSchema, TicketResponseSchema
 from src.services import TicketService
 
 
+def _labelize_enum_value(value: str) -> str:
+    """Convert enum values to readable UI labels."""
+    return value.replace("_", " ").title()
+
+
 def _coerce_enum[TEnum: StrEnum](enum_cls: type[TEnum], value: TEnum | str) -> TEnum:
     """Convert serialized table values back into canonical enum members."""
     if isinstance(value, enum_cls):
         return value
-    return enum_cls(str(value).strip().lower())
+    return enum_cls(str(value).strip().lower().replace(" ", "_"))
 
 
 def _manual_triage_enabled(row: dict[str, Any]) -> bool:
@@ -121,7 +126,7 @@ def create_manual_triage_opener(
                 with ui.row().classes("w-full gap-4"):
                     priority_input = (
                         ui.select(
-                            {priority.value: priority.value.title() for priority in ServicePriority},
+                            {priority.value: _labelize_enum_value(priority.value) for priority in ServicePriority},
                             label="Priority",
                             on_change=lambda _: apply_validation_feedback(),
                         )
@@ -130,7 +135,7 @@ def create_manual_triage_opener(
                     )
                     category_input = (
                         ui.select(
-                            {category.value: category.value.title() for category in ServiceCategory},
+                            {category.value: _labelize_enum_value(category.value) for category in ServiceCategory},
                             label="Category",
                             on_change=lambda _: apply_validation_feedback(),
                         )
@@ -140,7 +145,7 @@ def create_manual_triage_opener(
 
                 with ui.row().classes("w-full gap-4 items-end"):
                     status_input = ui.select(
-                        options={status.value: status.value.title() for status in ServiceStatus},
+                        options={status.value: _labelize_enum_value(status.value) for status in ServiceStatus},
                         label="Status",
                         on_change=lambda _: apply_validation_feedback(),
                     ).props("outlined")

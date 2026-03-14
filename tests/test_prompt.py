@@ -29,10 +29,13 @@ class PromptTests(unittest.TestCase):
             description="Login fails after reset",
             status=ServiceStatus.OPEN,
             priority=ServicePriority.LOW,
-            category=ServiceCategory.OTHER,
+            category=ServiceCategory.UNKNOWN,
+            department=None,
             ai_summary=None,
-            ai_response=None,
-            ai_next_steps=[],
+            ai_recommended_action=None,
+            ai_missing_information=None,
+            ai_reasoning=None,
+            ai_processing_ms=None,
             ai_confidence=None,
             ai_trace=None,
         )
@@ -60,6 +63,7 @@ class PromptTests(unittest.TestCase):
         self.assertIn("Canvas login issue", prompt)
         self.assertIn("password_reset_policy", prompt)
         self.assertIn("Password reset sync delay", prompt)
+        self.assertIn("return the required JSON", prompt)
 
     def test_build_ai_trace_preserves_matches(self) -> None:
         trace = build_ai_trace(
@@ -89,10 +93,13 @@ class PromptTests(unittest.TestCase):
             description="Login fails after reset",
             status=ServiceStatus.OPEN,
             priority=ServicePriority.LOW,
-            category=ServiceCategory.OTHER,
+            category=ServiceCategory.UNKNOWN,
+            department=None,
             ai_summary=None,
-            ai_response=None,
-            ai_next_steps=[],
+            ai_recommended_action=None,
+            ai_missing_information=None,
+            ai_reasoning=None,
+            ai_processing_ms=None,
             ai_confidence=None,
             ai_trace=None,
         )

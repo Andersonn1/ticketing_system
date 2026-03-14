@@ -39,6 +39,7 @@ HOME_ACTIONS: tuple[HomeAction, ...] = (
     HomeAction("Submit Ticket", "/request", "add_circle", primary=True),
     HomeAction("Support Queue", "/manual", "view_list"),
     HomeAction("AI Assist", "/ai-process", "smart_toy"),
+    HomeAction("Metrics", "/metrics", "query_stats"),
 )
 
 HOME_FEATURES: tuple[HomeFeature, ...] = (
@@ -54,7 +55,7 @@ HOME_FEATURES: tuple[HomeFeature, ...] = (
     ),
     HomeFeature(
         "AI-Assisted Handling",
-        "Use AI-assisted triage to summarize requests, suggest responses, and speed up repetitive service workflows.",
+        "Use AI triage to summarize requests, recommend actions, and speed up repetitive service workflows.",
         "auto_awesome",
     ),
 )

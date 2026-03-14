@@ -37,7 +37,7 @@ class TicketServiceContract(Protocol):
         self,
         *,
         session_provider: SessionProvider,
-        ollama_client: SupportsTriageLLMContract,
+        llm_client: SupportsTriageLLMContract,
     ) -> None:
         """Initialize the service with explicit runtime dependencies."""
         ...
@@ -76,6 +76,10 @@ class TicketServiceContract(Protocol):
 
     async def seed_kb_docs(self, docs: list[dict[str, Any]]) -> int:
         """Upsert KB docs and their embeddings."""
+        ...
+
+    async def refresh_ticket_embeddings(self) -> int:
+        """Regenerate embeddings for all tickets."""
         ...
 
     async def triage_ticket(self, ticket_id: int) -> TicketResponseSchema:

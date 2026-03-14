@@ -1,268 +1,230 @@
 # IT-548 AI Demo
 
-## Table of Contents
+AI-supported IT ticket triage demo built with NiceGUI, PostgreSQL, pgvector, and OpenAI.
 
-- [IT-548 AI Demo](#it-548-ai-demo)
-  - [Table of Contents](#table-of-contents)
-  - [Project Overview](#project-overview)
-    - [App Flow](#app-flow)
-    - [Database Schemas](#database-schemas)
-    - [LLM Prompt](#llm-prompt)
-    - [Tech Stack](#tech-stack)
-    - [Dependency Injection Convention](#dependency-injection-convention)
-  - [Getting Started](#getting-started)
-    - [Prerequisites](#prerequisites)
-    - [Quick Start](#quick-start)
-    - [Environment Configuration](#environment-configuration)
-    - [Useful `just` Commands](#useful-just-commands)
-    - [Running the App](#running-the-app)
-      - [Ensure Ollama Running and Models Are Pulled](#ensure-ollama-running-and-models-are-pulled)
-      - [Without Docker](#without-docker)
-      - [With Docker (recommended)](#with-docker-recommended)
-  - [Troubleshooting](#troubleshooting)
+## Overview
 
-## Project Overview
+The app currently exposes four main pages:
 
-This repository is an AI-supported IT ticketing demo built with NiceGUI.
+- `/` shows the home dashboard and navigation.
+- `/request` lets a user submit a support ticket.
+- `/manual` lets staff review tickets and record manual triage.
+- `/ai-process` runs OpenAI-backed triage with retrieval over knowledge-base chunks and similar tickets.
+- `/metrics` shows routing, latency, confidence, and review-needed metrics from persisted ticket data.
 
-### App Flow
+AI triage now uses OpenAI only:
 
-```text
-Application startup
-        |
-        v
-Run Alembic migrations
-        |
-Seed tickets from data/MOCK_DATA.json
-and seed demo KB chunks
-        |
-User opens NiceGUI pages
-        |
-        +--> `/manual` shows ticket table with manual status actions
-        |
-        +--> `/ai-process` shows the same ticket table plus
-              "Run AI on Selected"
-        |
-AI triage action
-        |
-        +--> build query text from selected ticket
-        +--> embed via Ollama
-        +--> search KB chunks and similar tickets in PostgreSQL / pgvector
-        +--> request structured JSON triage output from Ollama
-        +--> persist summary, response, category, priority,
-              next steps, confidence, and retrieval trace
-```
+- embeddings: `text-embedding-3-small`
+- vector size: `1536`
+- structured triage: OpenAI Responses API with strict JSON schema output
 
-### Database Schemas
+## AI Triage Output
 
-```text
-__Ticket_Table__
-  id pk
-  requestor_name str
-  requestor_email str
-  user_role student|faculty|alum|vendor|other
-  title str
-  description text
-  status open|pending|closed
-  priority High|Medium|Low
-  category Hardware|Software|Network|Security|Other
-  ai_summary text nullable
-  ai_response text nullable
-  ai_next_steps jsonb
-  ai_confidence High|Medium|Low nullable
-  ai_trace jsonb nullable
-  created_at datetime w tz
-  updated_at datetime w tz
+The AI result stored on each ticket includes:
 
-__Knowledge_Base_Chunks_Table__
-  id pk
-  source_name str
-  chunk_text text
-  metadata jsonb
-  embedding vector(...)
+- `category`
+- `priority`
+- `department`
+- `ai_summary`
+- `ai_recommended_action`
+- `ai_missing_information`
+- `ai_reasoning`
+- `ai_confidence`
+- `ai_processing_ms`
+- `ai_trace`
 
-__Ticket_Embeddings__
-  id pk
-  ticket_id fk
-  combined_text text
-  embedding vector(...)
-```
+Supported AI categories:
 
-### LLM Prompt
+- `network`
+- `account_access`
+- `password_reset`
+- `hardware_issue`
+- `software_issue`
+- `printer_issue`
+- `email_issue`
+- `security_concern`
+- `student_device`
+- `classroom_technology`
+- `unknown`
 
-```test
-You are a school IT help desk assistant.
+Supported departments:
 
-Return ONLY valid JSON.
-Do not include markdown fences or prose before/after the JSON.
-Be practical, concise, and grounded in the provided context.
-If the context is weak, say so explicitly in the response while still providing next steps.
+- `helpdesk`
+- `network_team`
+- `device_support`
+- `systems_admin`
+- `security_team`
 
-Ticket:
-Requestor: {requestor_name} ({user_role})
-Email: {requestor_email}
-Title: {title}
-Description: {description}
+## Data Model
 
-Relevant knowledge base context:
-{top_k_chunks}
+`ticket`
 
-Similar past tickets:
-{top_ticket_matches}
+- requestor and ticket details
+- workflow status
+- manual triage fields
+- AI triage fields and retrieval trace
 
-Return JSON with:
-category, priority, summary, response, next_steps, confidence
-```
+`kb_chunk`
 
-### Tech Stack
+- source text
+- metadata
+- `vector(1536)` embedding
 
-- [Python 3.13](https://www.python.org/downloads/) (runtime requirement)
-- [uv](https://docs.astral.sh/uv/) for Python project/dependency management
-- [NiceGUI](https://nicegui.io/) for the web UI
-- [Loguru](https://loguru.readthedocs.io/) for structured application logging
-- [Just](https://just.systems/man/en/) for command shortcuts
-- [Ollama](https://docs.ollama.com/) for local LLm hosting
-- [pgvector](https://github.com/pgvector/pgvector) for PostgreSQL vector search
+`ticket_embedding`
 
-### Dependency Injection Convention
+- normalized ticket text
+- `vector(1536)` embedding
 
-- Shared runtime services, clients, and app-facing settings providers live in `src/dependencies.py`.
-- NiceGUI pages and FastAPI routes should receive app services through `Depends(...)` where the framework supports it.
-- Lower-level implementation details such as repositories and session-bound objects stay local unless they become shared composition seams.
+## Requirements
 
-## Getting Started
+- Python `3.13.x`
+- `uv`
+- `just`
+- Docker for the local Postgres/pgvector stack
+- an OpenAI API key
 
-### Prerequisites
-
-- Python installed (3.13.x)
-- uv installed (`uv --version`)
-- just installed (`just --version`)
-- Git installed (`git --version`)
-- [Docker](https://docs.docker.com/get-started/get-docker/) installed (`docker --version`)
-- [Ollama](https://ollama.com/download) installed (`ollama --version`)
-
-### Quick Start
-
-1. From the repository root, run:
-
-   ```bash
-   just setup
-   ```
-
-2. Install optional development tools:
-
-   ```bash
-   just setup-dev
-   ```
-
-3. If you prefer manual setup instead of `just setup`, run:
-
-   ```bash
-   uv venv
-   uv sync
-   ./scripts/setup-env-files.sh
-   mkdir -p logs
-   ```
-
-### Environment Configuration
-
-Current app settings are loaded from `.env`:
-
-- `APP_NAME` (optional): Friendly app title.
-- `APP_ENV` (optional): `develop`, `staging`, or `production`.
-- `LOG_FILE` (optional): Log file path. Default is `logs/app.log`.
-- `LOG_LEVEL` (optional): Standard log level, e.g. `DEBUG` or `INFO`.
-- `LOG_FILE_ROTATION` (optional): Example: `3 days`.
-- `SESSION_KEY` (optional but recommended): Secret used by `SessionMiddleware`.
-- `CHAT_MODEL` (required): AI model name for your provider.
-- `EMBEDDING_MODEL` (required): Embedding model name for Ollama. `EMBED_MODEL` is also accepted.
-- `MODEL_PROVIDER` (optional): Provider identifier. Defaults to `ollama`.
-- `OLLAMA_BASE_URL` (optional): Ollama base URL. `MODEL_PROVIDER_URL` is also accepted.
-- `MODEL_PROVIDER_API_KEY` (optional): Provider API key.
-- `DB_NAME` (required): Name of the Postgres database.
-- `DB_USER` (required): Postgres username.
-- `DB_HOST` (optional): Postgres host. Defaults to `localhost`.
-- `DB_PASSWORD` (required): Postgres password.
-- `DB_PORT` (optional): Postgres port. Defaults to `5432`.
-- `DB_HOST` should be `localhost` for local non-container runs and `postgres` in compose.
-
-Note: the `.env` and `.env.TEMPLATE` can include additional variables; only values read by settings are required.
-
-### Useful `just` Commands
-
-- `just setup`  
-  Creates missing env files from templates, creates `.venv`, installs runtime dependencies, and ensures `logs/` exists.
-- `just setup-dev`  
-  Installs optional development dependencies (`uv sync --group dev`).
-- `just start`  
-  Runs the app with the configured virtual environment.
-- `just lint`  
-  Runs `ruff check .` on the project.
-- `just lint-fix`  
-  Runs `ruff check --fix .`.
-- `just format`  
-  Runs `ruff format .`.
-- `just migration-new "describe schema change"`  
-  Creates a new Alembic migration with autogeneration.
-- `just down`  
-  Stops the docker containers and removes their volumes.
-- `alembic upgrade head` runs during application startup via `src.db.migrations` to fail fast if DB or migration state is invalid.
-
-### Running the App
-
-The application automatically runs `alembic upgrade head` during startup and then seeds data from `data/MOCK_DATA.json` using the service-layer repository path. If either migrations or seed processing fail (for example, DB is unreachable or credentials are invalid), startup fails fast.
-
-#### Ensure Ollama Running and Models Are Pulled
+## Setup
 
 ```bash
-ollama pull qwen3.5:2b
+just setup
 ```
+
+`just setup` does the local bootstrap work the app expects:
+
+- copies `.env`, `postgres.env`, and `pgadmin.env` from their `*.env.TEMPLATE` files when missing
+- creates the virtual environment
+- installs project dependencies with `uv sync`
+- creates the `logs/` directory
+
+If you want dev tools too:
 
 ```bash
-ollama pull nomic-embed-text
+just setup-dev
 ```
 
-From project root:
+## Environment
 
-#### Without Docker
+The app reads settings from `.env`.
+
+Required OpenAI settings:
+
+- `OPENAI_API_KEY`
+- `OPENAI_CHAT_MODEL`
+- `OPENAI_EMBEDDING_MODEL`
+
+Optional OpenAI settings:
+
+- `OPENAI_TIMEOUT_SECONDS` default `60`
+- `OPENAI_MAX_RETRIES` default `2`
+
+Database settings:
+
+- `DB_NAME`
+- `DB_USER`
+- `DB_PASSWORD`
+- `DB_HOST`
+- `DB_PORT`
+
+Other app settings:
+
+- `APP_NAME`
+- `APP_ENV`
+- `SESSION_KEY`
+- `LOG_FILE`
+- `LOG_LEVEL`
+- `LOG_FILE_ROTATION`
+
+Recommended defaults:
+
+```env
+OPENAI_CHAT_MODEL=gpt-4.1-nano
+OPENAI_EMBEDDING_MODEL=text-embedding-3-small
+OPENAI_TIMEOUT_SECONDS=60
+OPENAI_MAX_RETRIES=2
+```
+
+## Running
+
+Run the app locally:
 
 ```bash
 just start
 ```
 
-or directly:
-
-```bash
-uv run python -m src.main
-```
-
-#### With Docker (recommended)
-
-The compose stack uses a PostgreSQL image with the `pgvector` extension preinstalled because the app migration creates `vector` columns and IVFFlat indexes during startup.
+Run the full local stack with Docker:
 
 ```bash
 just build
-```
-
-```bash
 just up
 ```
 
+The Docker stack uses `compose.yml` and starts:
+
+- the app on `http://localhost:8080`
+- PostgreSQL with pgvector on `localhost:5432`
+- pgAdmin on `http://localhost:5050`
+
+Startup behavior:
+
+- runs Alembic migrations
+- seeds mock tickets
+- seeds KB chunks
+- regenerates ticket embeddings so retrieval stays aligned with the active OpenAI embedding model
+
+The app also exposes a simple health endpoint at `/status`.
+
+## Mock Data
+
+`data/MOCK_DATA.json` is reproducible. The repo keeps the original hand-authored demo tickets and appends deterministic IT-helpdesk tickets generated from the Kaggle CSV seed files in `data/archive/`.
+
+The seed source for those CSV files is the Kaggle dataset `University Helpdesk Text Classification Dataset`:
+
+- [University Helpdesk Text Classification Dataset](https://www.kaggle.com/datasets/ramanduggal/university-helpdesk-text-classification-dataset)
+
+To regenerate the file:
+
 ```bash
-just down
+uv run python scripts/generate_mock_tickets.py
 ```
 
-> By default, the app runs at `http://127.0.0.1:8080`.
+The generator rewrites broader student-services questions into campus IT support requests, validates every record against `TicketCreateSchema`, and overwrites `data/MOCK_DATA.json`.
 
-Useful routes:
+## Testing
 
-- `/` home page
-- `/manual` manual ticket workflow
-- `/ai-process` AI triage workflow
-- `/status` health check
+Run the test suite with:
+
+```bash
+uv run pytest
+```
+
+Or, after your virtual environment is active, you can use:
+
+```bash
+just test
+```
+
+## Architecture
+
+AI triage flow:
+
+```text
+Ticket selected for AI triage
+    -> build query text
+    -> create OpenAI embedding
+    -> search KB chunks in pgvector
+    -> search similar tickets in pgvector
+    -> send strict JSON-schema triage request to OpenAI
+    -> persist AI result fields, trace, and processing time
+    -> refresh ticket embedding
+```
+
+The retrieval layer remains local to PostgreSQL. Only the embedding and triage model calls go to OpenAI.
 
 ## Troubleshooting
 
-- If `just start` fails on Windows, open a Unix-like shell (WSL/Git Bash) because the provided `Justfile` shell is configured for `zsh`.
-- If logging does not appear at `logs/app.log`, check write permissions to the configured `LOG_FILE` directory.
-- If AI model calls fail, verify `CHAT_MODEL`, `EMBEDDING_MODEL`, `OLLAMA_BASE_URL`, and `MODEL_PROVIDER_API_KEY`.
+- If startup fails, verify Postgres is reachable and migrations can run.
+- If `just setup` does not create env files, check that `.env.TEMPLATE`, `postgres.env.TEMPLATE`, and `pgadmin.env.TEMPLATE` are present in the repo root.
+- If AI calls fail, verify `OPENAI_API_KEY`, `OPENAI_CHAT_MODEL`, `OPENAI_EMBEDDING_MODEL`, `OPENAI_TIMEOUT_SECONDS`, and `OPENAI_MAX_RETRIES`.
+- If `uv run` fails because dependencies are missing, rerun `just setup` and `just setup-dev` if you need test tools.
+- If retrieval quality looks wrong after a migration or model change, rerun startup seed or regenerate embeddings so `kb_chunk` and `ticket_embedding` rows are repopulated at `1536` dimensions.
+- If embedding requests fail, use an OpenAI embedding model compatible with native `1536`-dimension output such as `text-embedding-3-small`.

@@ -72,6 +72,7 @@ class TicketRepositoryContract(Protocol):
         ticket: TicketModel,
         triage: TriageResultSchema,
         trace: TicketAITraceSchema,
+        processing_ms: int,
     ) -> TicketModel:
         """Persist AI triage fields onto a ticket."""
         ...

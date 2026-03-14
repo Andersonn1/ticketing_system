@@ -7,6 +7,7 @@ from .kb_chunk import KBChunkModel
 from .ticket import (
     AIConfidence,
     ServiceCategory,
+    ServiceDepartment,
     ServicePriority,
     ServiceStatus,
     TicketModel,
@@ -16,6 +17,7 @@ from .ticket import (
 __all__ = [
     "AIConfidence",
     "ServiceCategory",
+    "ServiceDepartment",
     "ServicePriority",
     "ServiceStatus",
     "TicketEmbeddingModel",

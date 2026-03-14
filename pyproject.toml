@@ -23,7 +23,7 @@ dependencies = [
     "alembic-postgresql-enum>=1.10.0",
     "httpx>=0.28.1",
     "uvicorn[standard]>=0.41.0",
-    "ollama>=0.6.1",
+    "openai>=2.26.0",
 ]
 
 

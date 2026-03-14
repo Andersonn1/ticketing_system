@@ -9,6 +9,7 @@ from unittest.mock import AsyncMock, patch
 from src.models import (
     AIConfidence,
     ServiceCategory,
+    ServiceDepartment,
     ServicePriority,
     ServiceStatus,
     TicketModel,
@@ -48,10 +49,13 @@ class ServiceTicketServiceTests(unittest.IsolatedAsyncioTestCase):
             description="Login fails after reset",
             status=ServiceStatus.OPEN,
             priority=ServicePriority.LOW,
-            category=ServiceCategory.OTHER,
+            category=ServiceCategory.UNKNOWN,
+            department=None,
             ai_summary=None,
-            ai_response=None,
-            ai_next_steps=[],
+            ai_recommended_action=None,
+            ai_missing_information=None,
+            ai_reasoning=None,
+            ai_processing_ms=None,
             manual_summary=None,
             manual_response=None,
             manual_next_steps=[],
@@ -86,7 +90,7 @@ class ServiceTicketServiceTests(unittest.IsolatedAsyncioTestCase):
         self.ticket_repository.set_status = AsyncMock(
             side_effect=lambda ticket, status: setattr(ticket, "status", status)
         )
-        self.ticket_repository.apply_triage = AsyncMock(side_effect=lambda ticket, triage, trace: ticket)
+        self.ticket_repository.apply_triage = AsyncMock(side_effect=self._apply_triage)
         self.ticket_repository.apply_manual_triage = AsyncMock(side_effect=self._apply_manual_triage)
         self.kb_repository.search_similar = AsyncMock(
             return_value=[
@@ -114,12 +118,14 @@ class ServiceTicketServiceTests(unittest.IsolatedAsyncioTestCase):
         self.llm_client = AsyncMock(spec=SupportsTriageLLMContract)
         self.llm_client.embed_text.return_value = [0.1, 0.2, 0.3]
         self.llm_client.chat_json.return_value = TriageResultSchema(
-            category=ServiceCategory.SOFTWARE,
+            category=ServiceCategory.SOFTWARE_ISSUE,
             priority=ServicePriority.MEDIUM,
+            department=ServiceDepartment.HELPDESK,
             summary="Summary",
-            response="Response",
-            next_steps=["Wait 15 minutes"],
+            recommended_action="Response",
             confidence=AIConfidence.HIGH,
+            missing_information="none",
+            reasoning="The request points to a software login issue.",
         )
 
     def _claim_for_triage(self, ticket_id: int) -> TicketModel | None:
@@ -137,6 +143,19 @@ class ServiceTicketServiceTests(unittest.IsolatedAsyncioTestCase):
         ticket.status = payload.status
         return ticket
 
+    def _apply_triage(self, ticket: TicketModel, triage: TriageResultSchema, trace: object, processing_ms: int) -> TicketModel:
+        del trace
+        ticket.category = triage.category
+        ticket.priority = triage.priority
+        ticket.department = triage.department
+        ticket.ai_summary = triage.summary
+        ticket.ai_recommended_action = triage.recommended_action
+        ticket.ai_missing_information = triage.missing_information
+        ticket.ai_reasoning = triage.reasoning
+        ticket.ai_processing_ms = processing_ms
+        ticket.ai_confidence = triage.confidence
+        return ticket
+
     async def asyncTearDown(self) -> None:
         self.embedding_repository_patch.stop()
         self.kb_repository_patch.stop()
@@ -145,23 +164,36 @@ class ServiceTicketServiceTests(unittest.IsolatedAsyncioTestCase):
     async def test_triage_ticket_updates_ticket_and_embedding(self) -> None:
         service = TicketService(
             session_provider=self.fake_get_session,
-            ollama_client=self.llm_client,
+            llm_client=self.llm_client,
         )
 
         result = await service.triage_ticket(7)
 
         self.assertEqual(result.status, ServiceStatus.CLOSED)
-        self.assertEqual(result.priority.value, "low")
+        self.assertEqual(result.department, ServiceDepartment.HELPDESK)
+        self.assertIsNotNone(result.ai_processing_ms)
         self.ticket_repository.claim_for_triage.assert_awaited_once_with(7)
         self.ticket_repository.set_status.assert_awaited()
         self.embedding_repository.search_similar.assert_awaited_once()
         self.embedding_repository.upsert.assert_awaited_once()
         self.assertEqual(self.fake_session.commit.await_count, 2)
 
+    async def test_refresh_ticket_embeddings_rebuilds_all_ticket_vectors(self) -> None:
+        self.ticket_repository.list_all = AsyncMock(return_value=[self.fake_ticket])
+        service = TicketService(
+            session_provider=self.fake_get_session,
+            llm_client=self.llm_client,
+        )
+
+        result = await service.refresh_ticket_embeddings()
+
+        self.assertEqual(result, 1)
+        self.embedding_repository.upsert.assert_awaited()
+
     async def test_triage_tickets_collects_failures(self) -> None:
         service = TicketService(
             session_provider=self.fake_get_session,
-            ollama_client=self.llm_client,
+            llm_client=self.llm_client,
         )
 
         result = await service.triage_tickets([7, 999])
@@ -172,7 +204,7 @@ class ServiceTicketServiceTests(unittest.IsolatedAsyncioTestCase):
     async def test_triage_ticket_raises_for_missing_ticket(self) -> None:
         service = TicketService(
             session_provider=self.fake_get_session,
-            ollama_client=self.llm_client,
+            llm_client=self.llm_client,
         )
 
         with self.assertRaisesRegex(ValueError, "Ticket 999 was not found"):
@@ -182,7 +214,7 @@ class ServiceTicketServiceTests(unittest.IsolatedAsyncioTestCase):
         self.fake_ticket.status = ServiceStatus.PENDING
         service = TicketService(
             session_provider=self.fake_get_session,
-            ollama_client=self.llm_client,
+            llm_client=self.llm_client,
         )
 
         with self.assertRaisesRegex(ValueError, "already being triaged"):
@@ -192,7 +224,7 @@ class ServiceTicketServiceTests(unittest.IsolatedAsyncioTestCase):
         self.fake_ticket.status = ServiceStatus.PENDING
         service = TicketService(
             session_provider=self.fake_get_session,
-            ollama_client=self.llm_client,
+            llm_client=self.llm_client,
         )
 
         with self.assertRaisesRegex(ValueError, "currently being triaged"):
@@ -204,11 +236,11 @@ class ServiceTicketServiceTests(unittest.IsolatedAsyncioTestCase):
     async def test_manual_triage_ticket_saves_manual_fields_for_open_ticket(self) -> None:
         service = TicketService(
             session_provider=self.fake_get_session,
-            ollama_client=self.llm_client,
+            llm_client=self.llm_client,
         )
 
         result = await service.manual_triage_ticket(7, self._manual_triage_payload(status=ServiceStatus.PENDING))
-
+        assert result is not None
         self.assertEqual(result.status, ServiceStatus.PENDING)
         self.assertEqual(result.manual_summary, "Investigated Canvas login sync issue.")
         self.assertEqual(result.manual_response, "We advised the student to wait for the sync delay to clear.")
@@ -220,20 +252,20 @@ class ServiceTicketServiceTests(unittest.IsolatedAsyncioTestCase):
         self.fake_ticket.status = ServiceStatus.PENDING
         service = TicketService(
             session_provider=self.fake_get_session,
-            ollama_client=self.llm_client,
+            llm_client=self.llm_client,
         )
 
         result = await service.manual_triage_ticket(7, self._manual_triage_payload(status=ServiceStatus.CLOSED))
-
+        assert result is not None
         self.assertEqual(result.status, ServiceStatus.CLOSED)
         self.assertEqual(result.priority, ServicePriority.MEDIUM)
-        self.assertEqual(result.category, ServiceCategory.SOFTWARE)
+        self.assertEqual(result.category, ServiceCategory.SOFTWARE_ISSUE)
 
     async def test_manual_triage_ticket_rejects_closed_ticket(self) -> None:
         self.fake_ticket.status = ServiceStatus.CLOSED
         service = TicketService(
             session_provider=self.fake_get_session,
-            ollama_client=self.llm_client,
+            llm_client=self.llm_client,
         )
 
         with self.assertRaisesRegex(ValueError, "already been closed"):
@@ -258,7 +290,7 @@ class ServiceTicketServiceTests(unittest.IsolatedAsyncioTestCase):
             response="We advised the student to wait for the sync delay to clear.",
             next_steps=["Wait 15 minutes.", "Retry Canvas after clearing cache."],
             priority=ServicePriority.MEDIUM,
-            category=ServiceCategory.SOFTWARE,
+            category=ServiceCategory.SOFTWARE_ISSUE,
             status=status,
         )
 

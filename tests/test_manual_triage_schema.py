@@ -16,7 +16,7 @@ def _valid_payload(**overrides: object) -> dict[str, object]:
         "response": "We confirmed the account is active and advised the student about the sync delay.",
         "next_steps": ["Wait 15 minutes for credential sync.", "Retry Canvas after clearing browser cache."],
         "priority": ServicePriority.MEDIUM,
-        "category": ServiceCategory.SOFTWARE,
+        "category": ServiceCategory.SOFTWARE_ISSUE,
         "status": ServiceStatus.PENDING,
     }
     payload.update(overrides)

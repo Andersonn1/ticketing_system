@@ -36,16 +36,16 @@ from .models import SeedSummary, TriageBatchResult
 class TicketService(TicketServiceContract):
     """Ticket Service."""
 
-    __slots__ = ("_ollama_client", "_session_provider")
+    __slots__ = ("_llm_client", "_session_provider")
 
     def __init__(
         self,
         *,
         session_provider: SessionProvider,
-        ollama_client: SupportsTriageLLMContract,
+        llm_client: SupportsTriageLLMContract,
     ) -> None:
         self._session_provider = session_provider
-        self._ollama_client = ollama_client
+        self._llm_client = llm_client
 
     async def list_tickets(self) -> list[TicketResponseSchema]:
         """Return all tickets from the database."""
@@ -158,7 +158,7 @@ class TicketService(TicketServiceContract):
         async with self._session_provider() as session:
             repository = KBChunkRepository(session)
             for doc in docs:
-                embedding = await self._ollama_client.embed_text(str(doc["chunk_text"]))
+                embedding = await self._llm_client.embed_text(str(doc["chunk_text"]))
                 await repository.upsert(
                     source_name=str(doc["source_name"]),
                     chunk_text=str(doc["chunk_text"]),
@@ -168,6 +168,26 @@ class TicketService(TicketServiceContract):
                 upserted += 1
             await session.commit()
 
+        return upserted
+
+    async def refresh_ticket_embeddings(self) -> int:
+        """Regenerate embeddings for all tickets so retrieval stays in sync with the active model."""
+        upserted = 0
+        async with self._session_provider() as session:
+            ticket_repository = TicketRepository(session)
+            embedding_repository = TicketEmbeddingRepository(session)
+            tickets = await ticket_repository.list_all()
+            for ticket in tickets:
+                combined_text = build_ticket_embedding_text(ticket)
+                embedding = await self._llm_client.embed_text(combined_text)
+                await embedding_repository.upsert(
+                    ticket_id=ticket.id,
+                    combined_text=combined_text,
+                    embedding=embedding,
+                )
+                upserted += 1
+            await session.commit()
+        logger.info("Regenerated {} ticket embeddings.", upserted)
         return upserted
 
     async def triage_ticket(self, ticket_id: int) -> TicketResponseSchema:
@@ -201,7 +221,7 @@ class TicketService(TicketServiceContract):
             logger.info("Ticket {} claimed for triage and moved to Pending.", ticket_id)
             try:
                 query_text = build_query_text(ticket)
-                query_embedding = await self._ollama_client.embed_text(query_text)
+                query_embedding = await self._llm_client.embed_text(query_text)
                 logger.debug("Generated query embedding for ticket {}.", ticket_id)
                 kb_matches = await kb_repository.search_similar(query_embedding, top_k=KB_TOP_K)
                 ticket_matches = await embedding_repository.search_similar(
@@ -215,14 +235,15 @@ class TicketService(TicketServiceContract):
                     len(kb_matches),
                     len(ticket_matches),
                 )
-                triage_result = await self._ollama_client.chat_json(build_prompt(ticket, kb_matches, ticket_matches))
+                triage_result = await self._llm_client.chat_json(build_prompt(ticket, kb_matches, ticket_matches))
                 ai_trace = build_ai_trace(
                     query_text=query_text,
                     kb_matches=kb_matches,
                     ticket_matches=ticket_matches,
                 )
+                processing_ms = max(1, int((perf_counter() - started_at) * 1000))
 
-                await ticket_repository.apply_triage(ticket, triage_result, ai_trace)
+                await ticket_repository.apply_triage(ticket, triage_result, ai_trace, processing_ms)
                 await embedding_repository.upsert(
                     ticket_id=ticket.id,
                     combined_text=build_ticket_embedding_text(ticket),
@@ -347,9 +368,12 @@ class TicketService(TicketServiceContract):
             "status": row.status,
             "priority": row.priority,
             "category": row.category,
+            "department": row.department,
             "ai_summary": row.ai_summary,
-            "ai_response": row.ai_response,
-            "ai_next_steps": row.ai_next_steps or [],
+            "ai_recommended_action": row.ai_recommended_action,
+            "ai_missing_information": row.ai_missing_information,
+            "ai_reasoning": row.ai_reasoning,
+            "ai_processing_ms": row.ai_processing_ms,
             "manual_summary": row.manual_summary,
             "manual_response": row.manual_response,
             "manual_next_steps": row.manual_next_steps or [],

@@ -16,19 +16,30 @@ class DependencyProviderTests(unittest.TestCase):
         fake_session_provider = object()
         fake_client = object()
         original_get_session = dependencies._get_session
-        original_get_ollama_client = dependencies.get_ollama_client
+        original_get_llm_client = dependencies.get_llm_client
         try:
             dependencies._get_session = fake_session_provider  # type: ignore[assignment]
-            dependencies.get_ollama_client = lambda: fake_client  # type: ignore[assignment]
+            dependencies.get_llm_client = lambda: fake_client  # type: ignore[assignment]
 
             service = dependencies.get_ticket_service()
 
             self.assertIsInstance(service, TicketService)
             self.assertIs(service._session_provider, fake_session_provider)
-            self.assertIs(service._ollama_client, fake_client)
+            self.assertIs(service._llm_client, fake_client)
         finally:
             dependencies._get_session = original_get_session
-            dependencies.get_ollama_client = original_get_ollama_client
+            dependencies.get_llm_client = original_get_llm_client
+
+    def test_get_llm_client_returns_openai_client(self) -> None:
+        fake_client = object()
+        from src.llm import openai_client
+
+        original_get_openai_client = openai_client.get_openai_client
+        try:
+            openai_client.get_openai_client = lambda: fake_client  # type: ignore[assignment]
+            self.assertIs(dependencies.get_llm_client(), fake_client)
+        finally:
+            openai_client.get_openai_client = original_get_openai_client
 
     def test_page_registration_still_supports_dependency_injection(self) -> None:
         manual_request_page.register()
