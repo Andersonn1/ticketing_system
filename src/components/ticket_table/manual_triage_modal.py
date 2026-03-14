@@ -59,13 +59,15 @@ def _build_manual_triage_payload(row: dict[str, Any], form_values: dict[str, Any
     """Convert modal form values into the manual triage schema."""
     del row
     next_steps_text = str(form_values.get("next_steps") or "")
-    return ManualTriageSchema(
-        summary=str(form_values.get("summary") or "").strip(),
-        response=str(form_values.get("response") or "").strip(),
-        next_steps=[step.strip() for step in next_steps_text.splitlines()],
-        priority=_coerce_enum(ServicePriority, str(form_values.get("priority") or "")),
-        category=_coerce_enum(ServiceCategory, str(form_values.get("category") or "")),
-        status=_coerce_enum(ServiceStatus, str(form_values.get("status") or "")),
+    return ManualTriageSchema.model_validate(
+        {
+            "summary": str(form_values.get("summary") or "").strip(),
+            "response": str(form_values.get("response") or "").strip(),
+            "next_steps": [step.strip() for step in next_steps_text.splitlines()],
+            "priority": str(form_values.get("priority") or "").strip(),
+            "category": str(form_values.get("category") or "").strip(),
+            "status": str(form_values.get("status") or "").strip(),
+        }
     )
 
 

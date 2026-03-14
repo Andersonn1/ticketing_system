@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import unittest
 
+from pydantic import ValidationError
+
 from src.components.ticket_table.manual_triage_modal import (
     _build_manual_triage_payload,
     _manual_triage_enabled,
@@ -94,6 +96,22 @@ class ManualTriageModalHelperTests(unittest.TestCase):
         self.assertEqual(payload.priority, ServicePriority.MEDIUM)
         self.assertEqual(payload.category, ServiceCategory.SOFTWARE_ISSUE)
         self.assertEqual(payload.status, ServiceStatus.CLOSED)
+
+    def test_build_manual_triage_payload_rejects_blank_status_with_validation_error(self) -> None:
+        with self.assertRaises(ValidationError) as context:
+            _build_manual_triage_payload(
+                _row(status="Open"),
+                {
+                    "summary": "Existing login sync issue.",
+                    "response": "We advised the student to retry after sync completes.",
+                    "next_steps": "Wait 15 minutes.",
+                    "priority": "medium",
+                    "category": "software_issue",
+                    "status": "",
+                },
+            )
+
+        self.assertEqual(context.exception.errors()[0]["loc"], ("status",))
 
     def test_manual_triage_success_message_mentions_status(self) -> None:
         ticket = TicketResponseSchema(
