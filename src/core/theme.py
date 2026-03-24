@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from contextlib import contextmanager
 
 from nicegui import ui
@@ -11,7 +12,7 @@ from src.dependencies import get_settings
 
 
 @contextmanager
-def frame(navigation_title: str):
+def frame(navigation_title: str) -> Iterator[None]:
     """Custom page frame to share the same styling and behavior across all pages"""
     settings = get_settings()
     ui.colors(
