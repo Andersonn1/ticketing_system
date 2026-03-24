@@ -2,6 +2,13 @@
 
 AI-supported IT ticket triage demo built with NiceGUI, PostgreSQL, pgvector, and OpenAI.
 
+## Contributors
+
+- Nathan Anderson (Team member)
+- Adhwa Altheyab (Team member)
+- Farah Alregibah (Team member)
+- Generative AI (OpenAI Codex) tooling was used to assist with portions of the development process, including code drafting, refactoring suggestions, and documentation. All outputs were reviewed, modified, and validated by the project team before inclusion.
+
 ## Overview
 
 The app currently exposes four main pages:
@@ -177,7 +184,7 @@ The app also exposes a simple health endpoint at `/status`.
 
 `data/MOCK_DATA.json` is reproducible. The repo keeps the original hand-authored demo tickets and appends deterministic IT-helpdesk tickets generated from the Kaggle CSV seed files in `data/archive/`.
 
-The seed source for those CSV files is the Kaggle dataset `University Helpdesk Text Classification Dataset`:
+Seed data used for development and testing was derived from `University Helpdesk Text Classification Dataset`, accessed on 3/9/2026, and adapted for non-production use.
 
 - [University Helpdesk Text Classification Dataset](https://www.kaggle.com/datasets/ramanduggal/university-helpdesk-text-classification-dataset)
 
