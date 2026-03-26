@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from loguru import logger
-from nicegui import ui
+from nicegui import html, ui
 
 from src.core.theme import frame
 
@@ -34,14 +34,15 @@ def register() -> None:
     @ui.page("/")
     def home_page():
         logger.info("Rendering home page.")
-        ui.add_head_html(HEADER_SCRIPT_TAG)
         with frame("Help Desk"):
+            ui.add_head_html(HEADER_SCRIPT_TAG)
+
             with ui.column().classes("w-full max-w-7xl mx-auto gap-8 px-4 py-6 md:px-8"):
                 with ui.card().classes("w-full p-8 gap-4 bg-slate-50"):
                     ui.label("Help Desk").classes("text-h3 md:text-h2 font-bold text-primary")
                     ui.label(
                         "Submit requests, coordinate support workflows, and manage issue resolution from one shared portal."
-                    ).classes("text-body1 text-slate-700 max-w-3xl")
+                    ).classes("text-body1  max-w-3xl")
                     with ui.row().classes("w-full gap-3 items-center"):
                         for action in HOME_ACTIONS:
                             _render_home_action(action)
@@ -53,7 +54,7 @@ def register() -> None:
                             with ui.card().classes("col flex-1 min-w-[220px] p-5 gap-3"):
                                 ui.icon(feature.icon, color="primary").classes("text-3xl")
                                 ui.label(feature.title).classes("text-h6 font-semibold")
-                                ui.label(feature.description).classes("text-body2 text-slate-600")
+                                ui.label(feature.description).classes("text-body2 ")
 
                 with ui.row().classes("w-full gap-4 items-stretch"):
                     with ui.card().classes("col flex-1 min-w-[320px] p-6 gap-4"):
@@ -66,19 +67,19 @@ def register() -> None:
                                     color="primary",
                                     text_color="grey-11",
                                 )
-                                ui.label(step).classes("text-body2 text-slate-700")
+                                ui.label(step).classes("text-body2 ")
 
                     with ui.card().classes("col flex-1 min-w-[320px] p-6 gap-4"):
                         ui.label("What to include").classes("text-h5 font-semibold")
-                        ui.label("Common request areas").classes("text-subtitle2 font-medium text-slate-700")
+                        ui.label("Common request areas").classes("text-subtitle2 font-medium ")
                         for area in COMMON_REQUEST_AREAS:
-                            ui.label(f"• {area}").classes("text-body2 text-slate-600")
+                            ui.label(f"• {area}").classes("text-body2 ")
                         ui.separator()
-                        ui.label("Support expectations").classes("text-subtitle2 font-medium text-slate-700")
+                        ui.label("Support expectations").classes("text-subtitle2 font-medium ")
                         for expectation in SUPPORT_EXPECTATIONS:
-                            ui.label(f"• {expectation}").classes("text-body2 text-slate-600")
+                            ui.label(f"• {expectation}").classes("text-body2 ")
 
                 with ui.row().classes("w-full gap-4 items-stretch"):
                     with ui.card().classes("col flex-1 w-[400px] min-width[400px] max-width[400px] p-6 gap-4"):
                         ui.label("Support Schedule").classes("text-h5 font-semibold")
-                        ui.html("<div id='calendar'></div>")
+                        html.div(id="calendar")

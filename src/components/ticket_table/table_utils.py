@@ -77,8 +77,8 @@ def add_expandable_row(table: Table) -> Table:
             </q-tr>
             <q-tr v-show="props.expand" :props="props">
                 <q-td>
-                    <div class="q-pa-md row items-start q-gutter-md">
-                        <q-card class="my-card" flat bordered>
+                    <div class="q-pa-md row items-start q-gutter-md" style="width: 600px; height: 400px; overflow: scroll">
+                        <q-card class="my-card" flat bordered style="width:100%">
                             <q-item>
                                 <q-item-section>
                                     <q-item-label>Detailed Overview</q-item-label>
@@ -88,7 +88,7 @@ def add_expandable_row(table: Table) -> Table:
                                 </q-item-section>
                             </q-item>
                             <q-separator />
-                            <q-card-section horizontal style="text-wrap: auto; min-width:200px;">
+                            <q-card-section horizontal style="text-wrap: auto; min-width:200px; width: 100%;">
                                 <q-card-section auto-width>
                                     <div class="text-subtitle2">Original Ticket</div>
                                     <div>{{ props.row.description }}</div>
@@ -96,7 +96,7 @@ def add_expandable_row(table: Table) -> Table:
                                 <q-separator vertical />
                                 <q-card-section style="text-wrap: auto;">
                                     <div class="row items-start q-col-gutter-md">
-                                        <div class="col-3 col-md-3">
+                                        <div class="col-3 col-md-3" style="width: 100%">
                                             <q-item>
                                                 <q-item-section>
                                                     <q-item-label>Manual Triage</q-item-label>
@@ -119,7 +119,7 @@ def add_expandable_row(table: Table) -> Table:
                                                 </q-item-section>
                                             </q-item>
                                         </div>
-                                        <div class="col-9 col-md-9">
+                                        <div class="col-9 col-md-9"style="width: 100%">
                                             <q-item>
                                                 <q-item-section>
                                                     <q-item-label>AI Triage</q-item-label>
