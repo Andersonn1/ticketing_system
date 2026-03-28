@@ -210,20 +210,31 @@ Or, after your virtual environment is active, you can use:
 just test
 ```
 
+---
+
 ## Architecture
 
 AI triage flow:
 
-```text
-Ticket selected for AI triage
-    -> build query text
-    -> create OpenAI embedding
-    -> search KB chunks in pgvector
-    -> search similar tickets in pgvector
-    -> send strict JSON-schema triage request to OpenAI
-    -> persist AI result fields, trace, and processing time
-    -> refresh ticket embedding
+```mermaid
+---
+config:
+  title: Ticket selected for AI triag
+  htmlLabels: false
+---
+
+flowchart LR
+    first['build query text']
+    second['create OpenAI embedding']
+    third['search KB chunks in pgvector']
+    fourth['search similar tickets in pgvector']
+    fifth['send strict JSON-schema triage request to OpenAI']
+    sixth['persist AI result fields, trace, and processing time']
+    seventh['refresh ticket embedding']
+    first--> second --> third --> fourth --> fifth --> sixth --> seventh
 ```
+
+---
 
 The retrieval layer remains local to PostgreSQL. Only the embedding and triage model calls go to OpenAI.
 
